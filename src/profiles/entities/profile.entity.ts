@@ -1,6 +1,8 @@
 import { Entity,Column, PrimaryGeneratedColumn, JoinColumn, OneToOne, OneToMany } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 import { Post } from "../../posts/entities/post.entity";
+import { Comment } from "src/comments/entities/comment.entity";
+import { Like } from "src/likes/entities/like.entity";
 @Entity('profiles')
 export class Profile {
 
@@ -31,5 +33,11 @@ export class Profile {
 
     @OneToMany(()=>Post,(post)=>post.profile)
     post:Post[]
+
+    @OneToMany(()=>Comment,(comments)=>comments.profile)
+    comments:Comment[]
+
+    @OneToMany(()=>Like,(likes)=>likes.profile)
+    likes:Like[]
 
 }

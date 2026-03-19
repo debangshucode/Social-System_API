@@ -1,5 +1,7 @@
+import { Comment } from "src/comments/entities/comment.entity";
+import { Like } from "src/likes/entities/like.entity";
 import { Profile } from "src/profiles/entities/profile.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Post {
@@ -20,4 +22,10 @@ export class Post {
     
     @ManyToOne(()=>Profile,(profile)=>profile.post)
     profile : Profile;
+
+    @OneToMany(()=>Comment,(comments)=>comments.post)
+    comments:Comment[];
+
+    @OneToMany(()=>Like,(likes)=>likes.post)
+    likes:Like[];
 }
