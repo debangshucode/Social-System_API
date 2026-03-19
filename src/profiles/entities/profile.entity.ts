@@ -1,4 +1,4 @@
-import { Entity,Column, PrimaryGeneratedColumn, JoinColumn, OneToOne, OneToMany } from "typeorm";
+import { Entity,Column, PrimaryGeneratedColumn,DeleteDateColumn, JoinColumn, OneToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 import { Post } from "../../posts/entities/post.entity";
 import { Comment } from "src/comments/entities/comment.entity";
@@ -9,7 +9,9 @@ export class Profile {
     @PrimaryGeneratedColumn()
     id:number
 
-    @Column()
+    @Column({
+        unique:true
+    })
     user_name:string
 
     @Column()
@@ -18,13 +20,13 @@ export class Profile {
     @Column()
     avatar_url: string
     
-    @Column()
+    @CreateDateColumn()
     created_at:Date
     
-    @Column()
+    @DeleteDateColumn()
     deleted_at:Date
 
-    @Column()
+    @UpdateDateColumn()
     updated_at:Date
 
     @OneToOne(()=>User,(user)=>user.profile)
@@ -32,7 +34,7 @@ export class Profile {
     user:User
 
     @OneToMany(()=>Post,(post)=>post.profile)
-    post:Post[]
+    posts:Post[]
 
     @OneToMany(()=>Comment,(comments)=>comments.profile)
     comments:Comment[]

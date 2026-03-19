@@ -1,6 +1,6 @@
 import { Post } from "src/posts/entities/post.entity";
 import { Profile } from "src/profiles/entities/profile.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column,UpdateDateColumn, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('comments')
 export class Comment {
@@ -10,13 +10,13 @@ export class Comment {
     @Column()
     content:string;
 
-    @Column()
+    @CreateDateColumn()
     created_at:Date;
 
-    @Column()
+    @UpdateDateColumn()
     updated_at:Date;
 
-    @Column()
+    @DeleteDateColumn()
     deleted_at:Date;
 
     @ManyToOne(()=>Profile,(profile)=>profile.comments)

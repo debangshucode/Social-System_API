@@ -1,21 +1,33 @@
 import { Post } from "src/posts/entities/post.entity";
 import { Profile } from "src/profiles/entities/profile.entity";
-import { CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {Column,Index, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn ,JoinColumn } from "typeorm";
 
 @Entity('likes')
+@Index('unique_active_like', ['profileId', 'postId'], {
+    unique: true,
+    where: '"deleted_at" IS NULL',
+})
 export class Like {
     @PrimaryGeneratedColumn()
-    id:number;
-    
+    id: number;
+
     @CreateDateColumn()
-    created_at:Date
+    created_at: Date
 
     @DeleteDateColumn()
-    deleted_at:Date
+    deleted_at: Date
 
-    @ManyToOne(()=>Profile,(profile)=>profile.likes)
-    profile:Profile;
+    @Column()
+    profileId: number;
 
-    @ManyToOne(()=>Post,(post)=>post.likes)
-    post:Post;
+    @Column()
+    postId: number;
+
+    @ManyToOne(() => Profile, (profile) => profile.likes)
+    @JoinColumn({ name: 'profileId' })
+    profile: Profile;
+
+    @ManyToOne(() => Post, (post) => post.likes)
+    @JoinColumn({ name: 'postId' })
+    post: Post;
 }
