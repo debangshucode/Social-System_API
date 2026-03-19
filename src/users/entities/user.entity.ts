@@ -1,11 +1,11 @@
-import { first } from "rxjs";
-import { PrimaryGeneratedColumn,Column } from "typeorm";
+import { PrimaryGeneratedColumn,Column, Entity } from "typeorm";
 
 
 export enum user_role {
     ADMIN = 'ADMIN',
     USER = 'USER'
 }
+@Entity('users')
 export class User {
     @PrimaryGeneratedColumn()
     id:number;
