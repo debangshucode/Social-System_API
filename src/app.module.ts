@@ -8,6 +8,7 @@ import { CommentsModule } from './comments/comments.module';
 import { LikesModule } from './likes/likes.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -37,7 +38,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
           { rejectUnauthorized: false }
           : false,
       }),
-    }), UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule],
+    }), UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
