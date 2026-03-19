@@ -1,5 +1,5 @@
-import { PrimaryGeneratedColumn,Column, Entity } from "typeorm";
-
+import { PrimaryGeneratedColumn, Column, Entity, OneToOne } from "typeorm";
+import {Profile} from '../../profiles/entities/profile.entity'
 
 export enum user_role {
     ADMIN = 'ADMIN',
@@ -8,30 +8,33 @@ export enum user_role {
 @Entity('users')
 export class User {
     @PrimaryGeneratedColumn()
-    id:number;
+    id: number;
 
-    @Column({unique:true})
-    email:string;
-
-    @Column()
-    password:string;
+    @Column({ unique: true })
+    email: string;
 
     @Column()
-    first_name:string
+    password: string;
 
     @Column()
-    last_name:string
+    first_name: string
 
-    @Column({length:10})
-    phone_number:string
+    @Column()
+    last_name: string
+
+    @Column({ length: 10 })
+    phone_number: string
 
     @Column({
-        type:'enum',
-        enum:user_role,
-        default:user_role.USER
+        type: 'enum',
+        enum: user_role,
+        default: user_role.USER
     })
-    role:user_role
+    role: user_role
 
-    created_at:Date
+    created_at: Date
+
+    @OneToOne(() => Profile, (profile) => profile.user)
+    profile: Profile
 
 }
