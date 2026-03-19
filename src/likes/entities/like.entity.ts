@@ -3,7 +3,7 @@ import { Profile } from "src/profiles/entities/profile.entity";
 import {Column,Index, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn ,JoinColumn } from "typeorm";
 
 @Entity('likes')
-@Index('unique_active_like', ['profileId', 'postId'], {
+@Index('unique_active_like', ['profile_id', 'post_id'], {
     unique: true,
     where: '"deleted_at" IS NULL',
 })
@@ -18,16 +18,16 @@ export class Like {
     deleted_at: Date
 
     @Column()
-    profileId: number;
+    profile_id: number;
 
     @Column()
-    postId: number;
+    post_id: number;
 
     @ManyToOne(() => Profile, (profile) => profile.likes)
-    @JoinColumn({ name: 'profileId' })
+    @JoinColumn({ name: 'profile_id' })
     profile: Profile;
 
     @ManyToOne(() => Post, (post) => post.likes)
-    @JoinColumn({ name: 'postId' })
+    @JoinColumn({ name: 'post_id' })
     post: Post;
 }

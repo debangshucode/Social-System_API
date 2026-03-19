@@ -14,7 +14,9 @@ export class Profile {
     })
     user_name:string
 
-    @Column()
+    @Column({
+        type:'text'
+    })
     bio:string
 
     @Column()
@@ -30,7 +32,7 @@ export class Profile {
     updated_at:Date
 
     @OneToOne(()=>User,(user)=>user.profile)
-    @JoinColumn()
+    @JoinColumn({name:'user_id'})
     user:User
 
     @OneToMany(()=>Post,(post)=>post.profile)

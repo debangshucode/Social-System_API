@@ -19,7 +19,7 @@ export const AppDataSource = new DataSource({
     {rejectUnauthorized:false} :false,
 
     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-    migrations: [__dirname + '/../db/migrations/*{.ts,.js}'],
+    migrations: [__dirname + '/db/migrations/*{.ts,.js}'],
 
     synchronize:false
 
