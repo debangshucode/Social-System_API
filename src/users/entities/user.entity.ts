@@ -1,5 +1,5 @@
-import { PrimaryGeneratedColumn, Column, Entity, OneToOne, CreateDateColumn } from "typeorm";
-import {Profile} from '../../profiles/entities/profile.entity'
+import { PrimaryGeneratedColumn, Column, Entity, OneToOne, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Profile } from '../../profiles/entities/profile.entity'
 
 export enum user_role {
     ADMIN = 'ADMIN',
@@ -32,8 +32,15 @@ export class User {
     })
     role: user_role
 
+    @Column({type:'varchar', nullable: true })
+    refreshToken: string | null;
+
     @CreateDateColumn()
     created_at: Date
+
+    @UpdateDateColumn()
+    updated_at: Date
+
 
     @OneToOne(() => Profile, (profile) => profile.user)
     profile: Profile

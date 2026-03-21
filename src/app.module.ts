@@ -10,12 +10,15 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { APP_PIPE } from '@nestjs/core';
+import jwtConfig from './config/jwt.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
+      load: [jwtConfig]
     }),
+
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'postgres',
@@ -39,13 +42,15 @@ import { APP_PIPE } from '@nestjs/core';
           { rejectUnauthorized: false }
           : false,
       }),
-    }), UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule],
+    }),
+    
+    UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule],
   controllers: [AppController],
-  providers: [AppService,{
-    provide:APP_PIPE,
-    useValue:new ValidationPipe ({
-      whitelist:true,
-      forbidNonWhitelisted:true
+  providers: [AppService, {
+    provide: APP_PIPE,
+    useValue: new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true
     })
   }],
 })

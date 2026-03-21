@@ -43,9 +43,20 @@ export class CreateUserTable1773911163245 implements MigrationInterface {
                         default:"'USER'"
                     },
                     {
+                        name:'refreshToken',
+                        type:'varchar',
+                        isNullable:true,
+                    },
+                    {
                         name:'created_at',
                         type:'timestamp',
                         default:'now()'
+                    },
+                    {
+                        name:'updated_at',
+                        type:'timestamp',
+                        default:'now()',
+                        onUpdate:'CURRENT_TIMESTAMP'
                     }
                 ]
             })
