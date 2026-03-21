@@ -6,6 +6,8 @@ import type { Request, Response } from 'express';
 import { user_role } from 'src/users/entities/user.entity';
 import { jwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { jwtAuthGuard } from './guards/jwt-auth.guard';
+import { Serialize } from 'src/interceptor/serialize.interceptor';
+import { AuthResponseDto } from './dto/auth.dto';
 
 
 @Controller('auth')
@@ -13,17 +15,21 @@ export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Post('/signup')
+  @Serialize(AuthResponseDto)
   async signup(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) res: Response) {
-    const {tokens,user} = await this.authService.register(registerDto);
+    const { tokens, user } = await this.authService.register(registerDto);
     this.setRefreshCookie(res, tokens.refreshToken);
     return { accessToken: tokens.refreshToken, user };
   }
 
   @Post('/login')
+  @Serialize(AuthResponseDto)
   async signin(@Body() logInDto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    const {tokens,user} = await this.authService.login(logInDto);
+    const { tokens, user } = await this.authService.login(logInDto);
     this.setRefreshCookie(res, tokens.refreshToken);
-    return { accessToken: tokens.accessToken,user };
+    return {
+      accessToken: tokens.accessToken, user
+    };
   }
 
   @Post('/refresh')
