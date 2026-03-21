@@ -1,7 +1,6 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -27,7 +26,7 @@ export class AuthService {
     const tokens = await this.generateTokens(user.id,user.email,user.role);
     await this.persistRefreshToken(user.id,tokens.refreshToken);
 
-    return tokens;
+    return {tokens, user};
   }
 
   async login(login:LoginDto){
@@ -39,7 +38,7 @@ export class AuthService {
     const tokens = await this.generateTokens(user.id,user.email,user.role);
     await this.persistRefreshToken(user.id,tokens.refreshToken);
 
-    return tokens
+    return {tokens, user};
   }
 
   async refresh(user_id:number,email:string,role:user_role){
