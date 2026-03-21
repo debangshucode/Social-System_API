@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { APP_PIPE } from '@nestjs/core';
+import { AvatarModule } from './avatar/avatar.module';
 import jwtConfig from './config/jwt.config';
 
 @Module({
@@ -44,7 +45,7 @@ import jwtConfig from './config/jwt.config';
       }),
     }),
     
-    UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule],
+    UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule, AvatarModule],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_PIPE,
