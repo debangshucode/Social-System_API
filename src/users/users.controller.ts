@@ -12,6 +12,16 @@ import { plainToInstance } from 'class-transformer';
 import { RoleGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { user_role } from './entities/user.entity';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
@@ -19,6 +29,10 @@ export class UsersController {
   // * User -- Change Password
   @Patch('/me/password')
   @UseGuards(jwtAuthGuard)
+  @ApiOperation({ summary: 'Change the current user password' })
+  @ApiBearerAuth()
+  @ApiBody({ type: changePasswordDto })
+  @ApiOkResponse({ schema: { example: { message: 'Password changed successfully' } } })
   async changePassword(@Req() req: Request, @Body() changePassDto: changePasswordDto) {
     const { user_id } = req.user as { user_id: number };
     await this.usersService.changePass(user_id, changePassDto.cur_password, changePassDto.new_password);
@@ -29,6 +43,10 @@ export class UsersController {
   @Patch('/me/edit')
   @Serialize(UserDto)
   @UseGuards(jwtAuthGuard)
+  @ApiOperation({ summary: 'Update the current user profile' })
+  @ApiBearerAuth()
+  @ApiBody({ type: UpdateUserDto })
+  @ApiOkResponse({ type: UserDto })
   async editUser(@Req() req: Request, @Body() updateUserDto: UpdateUserDto) {
     const { user_id } = req.user as { user_id: number };
     const updatedUser = await this.usersService.update(user_id, updateUserDto)
@@ -38,6 +56,9 @@ export class UsersController {
   @Get('/me')
   @Serialize(UserDto)
   @UseGuards(jwtAuthGuard)
+  @ApiOperation({ summary: 'Get the current user profile' })
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: UserDto })
   async getCurUser(@Req() req: Request) {
     const { user_id } = req.user as { user_id: number };
     return this.usersService.findOne(user_id);
@@ -49,6 +70,10 @@ export class UsersController {
   @Get()
   @UseGuards(jwtAuthGuard, RoleGuard)
   @Roles(user_role.ADMIN)
+  @ApiOperation({ summary: 'Get all users as admin' })
+  @ApiBearerAuth()
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
   async findAll(@Paginate() query: PaginateQuery) {
     const result = await this.usersService.findAll(query);
 
@@ -65,6 +90,10 @@ export class UsersController {
   @Serialize(UserDto)
   @UseGuards(jwtAuthGuard, RoleGuard)
   @Roles(user_role.ADMIN)
+  @ApiOperation({ summary: 'Get a user by id as admin' })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  @ApiOkResponse({ type: UserDto })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return await this.usersService.findOne(id);
   }
@@ -74,6 +103,11 @@ export class UsersController {
   @Serialize(UserDto)
   @UseGuards(jwtAuthGuard, RoleGuard)
   @Roles(user_role.ADMIN)
+  @ApiOperation({ summary: 'Update a user by id as admin' })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', type: Number, example: 1 })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiOkResponse({ type: UserDto })
   async update(@Param('id',ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
     return await this.usersService.update(id, updateUserDto)
   }

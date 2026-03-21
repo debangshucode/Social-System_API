@@ -1,27 +1,35 @@
 import { Expose } from "class-transformer";
+import { ApiProperty } from '@nestjs/swagger';
 import { user_role } from "../entities/user.entity";
 
 export class UserDto {
 
     @Expose()
+    @ApiProperty({ example: 'alex@example.com' })
     email:string;
 
     @Expose()
+    @ApiProperty({ example: 'Alex' })
     first_name:string;
 
     @Expose()
+    @ApiProperty({ example: 'Morgan' })
     last_name:string;
 
     @Expose()
+    @ApiProperty({ example: '9876543210' })
     phone_number:string;
 
     @Expose()
+    @ApiProperty({ enum: user_role, example: user_role.USER })
     role:user_role;
 
     @Expose()
+    @ApiProperty({ example: '2026-03-21T06:13:28.901Z' })
     created_at:Date;
 
     @Expose()
+    @ApiProperty({ example: '2026-03-21T10:06:55.320Z' })
     updated_at:Date;
 
 }

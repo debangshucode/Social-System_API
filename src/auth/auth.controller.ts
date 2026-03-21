@@ -8,22 +8,37 @@ import { jwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { jwtAuthGuard } from './guards/jwt-auth.guard';
 import { Serialize } from 'src/interceptor/serialize.interceptor';
 import { AuthResponseDto } from './dto/auth.dto';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiCookieAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Post('/signup')
   @Serialize(AuthResponseDto)
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiBody({ type: RegisterDto })
+  @ApiOkResponse({ type: AuthResponseDto })
   async signup(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) res: Response) {
     const { tokens, user } = await this.authService.register(registerDto);
     this.setRefreshCookie(res, tokens.refreshToken);
-    return { accessToken: tokens.refreshToken, user };
+    return { accessToken: tokens.accessToken, user };
   }
 
   @Post('/login')
   @Serialize(AuthResponseDto)
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiBody({ type: LoginDto })
+  @ApiOkResponse({ type: AuthResponseDto })
   async signin(@Body() logInDto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const { tokens, user } = await this.authService.login(logInDto);
     this.setRefreshCookie(res, tokens.refreshToken);
@@ -34,6 +49,9 @@ export class AuthController {
 
   @Post('/refresh')
   @UseGuards(jwtRefreshGuard)
+  @ApiOperation({ summary: 'Refresh the access token using the refresh cookie' })
+  @ApiCookieAuth('refresh_token')
+  @ApiOkResponse({ schema: { example: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' } } })
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { user_id, email, role } = req.user as { user_id: number, email: string, role: user_role };
     const tokens = await this.authService.refresh(user_id, email, role);
@@ -43,6 +61,9 @@ export class AuthController {
 
   @Post('/logout')
   @UseGuards(jwtAuthGuard)
+  @ApiOperation({ summary: 'Logout the current user' })
+  @ApiBearerAuth()
+  @ApiOkResponse({ schema: { example: { message: 'Logged Out' } } })
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { user_id } = req.user as { user_id: number };
     await this.authService.logout(user_id);
