@@ -72,4 +72,12 @@ export class UsersService {
 
     return await this.userRepo.save(user)
   }
+
+  async remove (id:number){
+    const user = await this.userRepo.findOne({where:{id}});
+    if(!user) throw new NotFoundException('User not found');
+
+    await this.userRepo.softDelete(id);
+    return { message : 'User deactivated successfully'}
+  }
 }
