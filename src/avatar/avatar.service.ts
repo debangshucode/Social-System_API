@@ -8,7 +8,7 @@ import { ProfilesService } from 'src/profiles/profiles.service';
 
 @Injectable()
 export class AvatarService {
-    constructor(private config: ConfigService, private userService: UsersService,private profileService:ProfilesService) { }
+    constructor(private config: ConfigService, private userService: UsersService, private profileService: ProfilesService) { }
 
     async generateSignature(userId: number) {
         const timeStamp = Math.round(Date.now() / 1000);
@@ -16,9 +16,10 @@ export class AvatarService {
         const folder = `avatars/users/${userId}`;
         const publicId = `avatars/users/${userId}/avatar_${userId}`;
 
-        const paramString = `folder=${folder}&public_id=${publicId}&timestamp=${timeStamp}`;
-
-        const signature = createHash('sha1').update(paramString + this.config.get('CLOUDINARY_API_KEY')).digest('hex');
+        const paramString = `public_id=${publicId}&timestamp=${timeStamp}`;
+        console.log('String to sign:', paramString);
+        console.log('API Secret:', `"${this.config.get('CLOUDINARY_API_SECRET')}"`);
+        const signature = createHash('sha1').update(paramString + this.config.get('CLOUDINARY_API_SECRET')).digest('hex');
 
 
         return {
@@ -48,7 +49,7 @@ export class AvatarService {
 
         // delete and replace the old avatar with the new
         const profile = await this.profileService.findByUserId(userId);
-        if(!profile) throw new NotFoundException('This user does not have a profile');
+        if (!profile) throw new NotFoundException('This user does not have a profile');
 
         if (profile.cloudinary_public_id && profile.cloudinary_public_id !== publicId) {
             try {
@@ -85,7 +86,7 @@ export class AvatarService {
 
     async deleteAvatar(userId: number) {
         const profile = await this.profileService.findByUserId(userId);
-        if(!profile) throw new NotFoundException('This user does not have a profile');
+        if (!profile) throw new NotFoundException('This user does not have a profile');
 
         if (!profile.cloudinary_public_id) {
             return { avatar_url: null };
@@ -103,6 +104,6 @@ export class AvatarService {
             cloudinary_public_id: null,
         })
 
-        return { avatar_url:null }
+        return { avatar_url: null }
     }
 }

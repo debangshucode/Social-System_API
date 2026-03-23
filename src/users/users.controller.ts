@@ -1,10 +1,10 @@
-import { Controller, Get, Body, Patch, Param, Delete, Req, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, Req, UseGuards, ParseIntPipe, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import type { Request } from 'express';
 import { jwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { changePasswordDto } from './dto/change-password.dto';
-import {  Paginate } from 'nestjs-paginate';
+import { Paginate } from 'nestjs-paginate';
 import type { PaginateQuery } from 'nestjs-paginate'
 import { Serialize } from 'src/interceptor/serialize.interceptor';
 import { UserDto } from './dto/user.dto';
@@ -61,7 +61,9 @@ export class UsersController {
   @ApiOkResponse({ type: UserDto })
   async getCurUser(@Req() req: Request) {
     const { user_id } = req.user as { user_id: number };
-    return this.usersService.findOne(user_id);
+    const user = await this.usersService.findOne(user_id);
+    if (!user) throw new NotFoundException('User not found !');
+    return user;
   }
 
   //^ ===== ADMIN  Routes ====
@@ -108,7 +110,7 @@ export class UsersController {
   @ApiParam({ name: 'id', type: Number, example: 1 })
   @ApiBody({ type: UpdateUserDto })
   @ApiOkResponse({ type: UserDto })
-  async update(@Param('id',ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
     return await this.usersService.update(id, updateUserDto)
   }
 

@@ -1,15 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Repository } from 'typeorm';
 import { Profile } from './entities/profile.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ProfilesService {
-  constructor(@InjectRepository(Profile) private profileRepo: Repository<Profile>) { }
-  create(createProfileDto: CreateProfileDto) {
-    return 'This action adds a new profile';
+  constructor(@InjectRepository(Profile) private profileRepo: Repository<Profile>, private userService: UsersService) { }
+  async create(id: number, createProfileDto: CreateProfileDto) {
+    const user = await this.userService.findOne(id);
+    if (!user) throw new NotFoundException('User not found !');
+    const isProfile = await this.profileRepo.findOne({where:{user:{id}}});
+    if(isProfile) throw new BadRequestException('Profile Already Existes');
+
+    const profile = this.profileRepo.create({...createProfileDto,user}); 
+    return this.profileRepo.save(profile)
   }
 
   findAll() {
@@ -42,16 +49,15 @@ export class ProfilesService {
       avatar_url: string | null;
       cloudinary_public_id: string | null;
     }
-  )
-  {
+  ) {
     await this.profileRepo.update(
-      {user:{id}},
+      { user: { id } },
       {
-        avatar_url:data.avatar_url,
-        cloudinary_public_id:data.cloudinary_public_id,
+        avatar_url: data.avatar_url,
+        cloudinary_public_id: data.cloudinary_public_id,
       }
     );
 
-    return {avatar_url:data.avatar_url};
+    return { avatar_url: data.avatar_url };
   }
 }

@@ -18,12 +18,14 @@ export class AvatarController {
     return await this.avatarService.generateSignature(user_id)
   }
 
+  @ApiBearerAuth()
   @Patch('/upload')
   async updateAvatart(@Req() req: Request, @Body() dto: UpdateAvatarDto) {
     const { user_id } = req.user as { user_id: number };
     return await this.avatarService.updateAvatar(user_id, dto.public_id)
   }
 
+  @ApiBearerAuth()
   @Delete()
   async deleteAvatar(@Req() req: Request) {
     const { user_id } = req.user as { user_id: number };
