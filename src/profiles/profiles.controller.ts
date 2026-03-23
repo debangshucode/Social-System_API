@@ -44,7 +44,6 @@ export class ProfilesController {
 
   @Delete('/me')
   @ApiBearerAuth()
-  @Serialize(ProfileDto)
   remove(@Req() req: Request) {
     const { user_id } = req.user as { user_id: number };
     return this.profilesService.remove(user_id);
@@ -66,16 +65,47 @@ export class ProfilesController {
     }
   }
 
-  // @Post('/create-profile')
-  // @UseGuards(jwtAuthGuard)
-  // @ApiBearerAuth()
-  // createUserProfile(@Req() req: Request, @Body() createProfileDto: CreateProfileDto) {
-  //   const { user_id } = req.user as { user_id: number };
-  //   return this.profilesService.create(user_id, createProfileDto);
-  // }
+  @Post('/create-profile/:id')
+  @UseGuards(RoleGuard)
+  @Roles(user_role.ADMIN)
+  @Serialize(ProfileDto)
+  @ApiBearerAuth()
+  createUserProfile(@Param('id', ParseIntPipe) id: number, @Body() createProfileDto: CreateProfileDto) {
+    return this.profilesService.create(id, createProfileDto);
+  }
 
-  // update user profile 
-  // get user profile by id 
-  // delete profile by id
+  @Get(':id')
+  @UseGuards(RoleGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth()
+  @Serialize(ProfileDto)
+  findOneById(@Param('id', ParseIntPipe) id: number) {
+    return this.profilesService.findOne(id);
+  }
+
+  @Patch('/restore/:id')
+  @UseGuards(RoleGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth()
+  restoreById(@Param('id',ParseIntPipe) id:number) {
+    return this.profilesService.restore(id);
+  }
+
+  @Patch(':id')
+  @UseGuards(RoleGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth()
+  @Serialize(ProfileDto)
+  updateProfileById(@Param('id',ParseIntPipe) id:number, @Body() updateProfileDto: UpdateProfileDto) {
+    return this.profilesService.update(id, updateProfileDto);
+  }
+  
+  @Delete(':id')
+  @UseGuards(RoleGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth()
+  removeById(@Param('id' ,ParseIntPipe) id:number) {
+    return this.profilesService.remove(id);
+  }
 
 }

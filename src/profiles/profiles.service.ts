@@ -21,18 +21,19 @@ export class ProfilesService {
     return this.profileRepo.save(profile)
   }
 
-  findAll(query:PaginateQuery) {
-    return paginate(query,this.profileRepo,{
-      sortableColumns:['id','created_at'],
-      searchableColumns:['user_name'],
-      defaultSortBy:[['id','DESC']]
+  findAll(query: PaginateQuery) {
+    return paginate(query, this.profileRepo, {
+      relations: ['users'],
+      sortableColumns: ['id', 'created_at'],
+      searchableColumns: ['user_name'],
+      defaultSortBy: [['id', 'DESC']]
     })
   }
 
   async findOne(id: number) {
     const user = await this.userService.findOne(id);
     if (!user) throw new NotFoundException('User not found !');
-    const Profile = await this.profileRepo.findOne({ where: { user: { id } } });
+    const Profile = await this.profileRepo.findOne({ where: { user: { id } }, relations: { user: true } });
     if (!Profile) throw new NotFoundException('Profile Not Existes !');
     return Profile;
   }
@@ -55,8 +56,24 @@ export class ProfilesService {
     if (!Profile) throw new NotFoundException('Profile Not Existes !');
 
     await this.profileRepo.softDelete(Profile.id)
-    
-    return {message:'Profile deleted succesfully'};
+
+    return { message: 'Profile deleted succesfully' };
+  }
+
+  async restore(id: number) {
+    const user = await this.userService.findOne(id);
+    if (!user) throw new NotFoundException('User not found !');
+    const Profile = await this.profileRepo.findOne({ where: { user: { id } }, withDeleted: true });
+    if (!Profile) throw new NotFoundException('Profile Not Existes !');
+
+    await this.profileRepo.restore(Profile.id)
+
+    if (Profile.deleted_at !== null) {
+      return { message: `Succesfully restored - ${Profile.user_name}` };
+    }
+    else {
+      return { message: `Profile is no deleted` };
+    }
   }
 
   async findByUserId(id: number) {
