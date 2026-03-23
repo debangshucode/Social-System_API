@@ -1,8 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, DeleteDateColumn, JoinColumn, OneToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 import { Post } from "../../posts/entities/post.entity";
-import { Comment } from "src/comments/entities/comment.entity";
-import { Like } from "src/likes/entities/like.entity";
+import { Comment } from "../../comments/entities/comment.entity";
+import { Like } from "../../likes/entities/like.entity";
 @Entity('profiles')
 export class Profile {
 
@@ -15,9 +15,10 @@ export class Profile {
     user_name: string
 
     @Column({
-        type: 'text'
+        type: 'text',
+        nullable: true
     })
-    bio: string
+    bio: string | null
 
     @Column({ type: 'text', nullable: true })
     avatar_url: string | null;
@@ -28,11 +29,11 @@ export class Profile {
     @CreateDateColumn()
     created_at: Date
 
-    @DeleteDateColumn()
-    deleted_at: Date
-
     @UpdateDateColumn()
     updated_at: Date
+
+    @DeleteDateColumn()
+    deleted_at: Date
 
     @OneToOne(() => User, (user) => user.profile)
     @JoinColumn({ name: 'user_id' })
