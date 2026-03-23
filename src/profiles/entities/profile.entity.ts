@@ -1,4 +1,4 @@
-import { Entity,Column, PrimaryGeneratedColumn,DeleteDateColumn, JoinColumn, OneToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, DeleteDateColumn, JoinColumn, OneToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { User } from "../../users/entities/user.entity";
 import { Post } from "../../posts/entities/post.entity";
 import { Comment } from "src/comments/entities/comment.entity";
@@ -7,41 +7,44 @@ import { Like } from "src/likes/entities/like.entity";
 export class Profile {
 
     @PrimaryGeneratedColumn()
-    id:number
+    id: number
 
     @Column({
-        unique:true
+        unique: true
     })
-    user_name:string
+    user_name: string
 
     @Column({
-        type:'text'
+        type: 'text'
     })
-    bio:string
+    bio: string
 
-    @Column()
-    avatar_url: string
-    
+    @Column({ type: 'text', nullable: true })
+    avatar_url: string | null;
+
+    @Column({ type: 'varchar', length: 300, nullable: true })
+    cloudinary_public_id: string | null;
+
     @CreateDateColumn()
-    created_at:Date
-    
+    created_at: Date
+
     @DeleteDateColumn()
-    deleted_at:Date
+    deleted_at: Date
 
     @UpdateDateColumn()
-    updated_at:Date
+    updated_at: Date
 
-    @OneToOne(()=>User,(user)=>user.profile)
-    @JoinColumn({name:'user_id'})
-    user:User
+    @OneToOne(() => User, (user) => user.profile)
+    @JoinColumn({ name: 'user_id' })
+    user: User
 
-    @OneToMany(()=>Post,(post)=>post.profile)
-    posts:Post[]
+    @OneToMany(() => Post, (post) => post.profile)
+    posts: Post[]
 
-    @OneToMany(()=>Comment,(comments)=>comments.profile)
-    comments:Comment[]
+    @OneToMany(() => Comment, (comments) => comments.profile)
+    comments: Comment[]
 
-    @OneToMany(()=>Like,(likes)=>likes.profile)
-    likes:Like[]
+    @OneToMany(() => Like, (likes) => likes.profile)
+    likes: Like[]
 
 }

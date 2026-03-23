@@ -12,12 +12,20 @@ import { AuthModule } from './auth/auth.module';
 import { APP_PIPE } from '@nestjs/core';
 import { AvatarModule } from './avatar/avatar.module';
 import jwtConfig from './config/jwt.config';
+import Joi from 'joi';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [jwtConfig]
+      
+      load: [jwtConfig],
+      
+      validationSchema: Joi.object({
+        CLOUDINARY_CLOUD_NAME: Joi.string().required(),
+        CLOUDINARY_API_KEY: Joi.string().required(),
+        CLOUDINARY_API_SECRET: Joi.string().required(),
+      })
     }),
 
     TypeOrmModule.forRootAsync({
@@ -44,14 +52,15 @@ import jwtConfig from './config/jwt.config';
           : false,
       }),
     }),
-    
+
     UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule, AvatarModule],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_PIPE,
     useValue: new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true
+      forbidNonWhitelisted: true,
+      transform: true,
     })
   }],
 })
