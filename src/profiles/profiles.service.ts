@@ -3,10 +3,11 @@ import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Repository } from 'typeorm';
 import { Profile } from './entities/profile.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ProfilesService {
-  constructor(private profileRepo: Repository<Profile>) { }
+  constructor(@InjectRepository(Profile) private profileRepo: Repository<Profile>) { }
   create(createProfileDto: CreateProfileDto) {
     return 'This action adds a new profile';
   }
