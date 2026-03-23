@@ -12,10 +12,10 @@ export class ProfilesService {
   async create(id: number, createProfileDto: CreateProfileDto) {
     const user = await this.userService.findOne(id);
     if (!user) throw new NotFoundException('User not found !');
-    const isProfile = await this.profileRepo.findOne({where:{user:{id}}});
-    if(isProfile) throw new BadRequestException('Profile Already Existes');
+    const isProfile = await this.profileRepo.findOne({ where: { user: { id } } });
+    if (isProfile) throw new BadRequestException('Profile Already Existes');
 
-    const profile = this.profileRepo.create({...createProfileDto,user}); 
+    const profile = this.profileRepo.create({ ...createProfileDto, user });
     return this.profileRepo.save(profile)
   }
 
@@ -23,16 +23,34 @@ export class ProfilesService {
     return `This action returns all profiles`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} profile`;
+  async findOne(id: number) {
+    const user = await this.userService.findOne(id);
+    if (!user) throw new NotFoundException('User not found !');
+    const Profile = await this.profileRepo.findOne({ where: { user: { id } } });
+    if (!Profile) throw new NotFoundException('Profile Not Existes !');
+    return Profile;
   }
 
-  update(id: number, updateProfileDto: UpdateProfileDto) {
-    return `This action updates a #${id} profile`;
+  async update(id: number, updateProfileDto: UpdateProfileDto) {
+    const user = await this.userService.findOne(id);
+    if (!user) throw new NotFoundException('User not found !');
+    const Profile = await this.profileRepo.findOne({ where: { user: { id } } });
+    if (!Profile) throw new NotFoundException('Profile Not Existes !');
+
+    Object.assign(Profile, updateProfileDto)
+
+    return await this.profileRepo.save(Profile)
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} profile`;
+  async remove(id: number) {
+    const user = await this.userService.findOne(id);
+    if (!user) throw new NotFoundException('User not found !');
+    const Profile = await this.profileRepo.findOne({ where: { user: { id } } });
+    if (!Profile) throw new NotFoundException('Profile Not Existes !');
+
+    await this.profileRepo.softDelete(Profile.id)
+    
+    return {message:'Profile deleted succesfully'};
   }
 
   async findByUserId(id: number) {
