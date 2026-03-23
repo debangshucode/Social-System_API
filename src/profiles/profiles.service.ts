@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { Profile } from './entities/profile.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
+import { paginate, PaginateQuery } from 'nestjs-paginate';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ProfilesService {
@@ -19,8 +21,12 @@ export class ProfilesService {
     return this.profileRepo.save(profile)
   }
 
-  findAll() {
-    return `This action returns all profiles`;
+  findAll(query:PaginateQuery) {
+    return paginate(query,this.profileRepo,{
+      sortableColumns:['id','created_at'],
+      searchableColumns:['user_name'],
+      defaultSortBy:[['id','DESC']]
+    })
   }
 
   async findOne(id: number) {

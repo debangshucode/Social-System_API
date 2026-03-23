@@ -5,9 +5,13 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import type { Request } from 'express';
 import { jwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import type { PaginateQuery } from 'nestjs-paginate';
+import { Paginate, type PaginateQuery } from 'nestjs-paginate';
 import { Serialize } from 'src/interceptor/serialize.interceptor';
 import { ProfileDto } from './dto/profile.dto';
+import { plainToInstance } from 'class-transformer';
+import { RoleGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { user_role } from 'src/users/entities/user.entity';
 @Controller('profiles')
 @UseGuards(jwtAuthGuard)
 export class ProfilesController {
@@ -48,10 +52,19 @@ export class ProfilesController {
 
   // * role admin
 
-  // @Get()
-  // findAll() {
-  //   return this.profilesService.findAll();
-  // }
+  @Get()
+  @UseGuards(RoleGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth()
+  async findAll(@Paginate() query: PaginateQuery) {
+    const result = await this.profilesService.findAll(query);
+    return {
+      ...result,
+      data: plainToInstance(ProfileDto, result.data, {
+        excludeExtraneousValues: true,
+      })
+    }
+  }
 
   // @Post('/create-profile')
   // @UseGuards(jwtAuthGuard)
