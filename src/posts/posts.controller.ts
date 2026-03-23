@@ -1,15 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete,Req, NotFoundException, UseGuards } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { ProfilesService } from 'src/profiles/profiles.service';
+import type { Request } from 'express';
+import { jwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('posts')
+@UseGuards(jwtAuthGuard)
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService,private profileService:ProfilesService) {}
 
+  
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
+  @ApiBearerAuth()
+  async create(@Req() req:Request,@Body() createPostDto: CreatePostDto) {
+    const {user_id} = req.user as {user_id:number};
+    const profile = await this.profileService.findByUserId(user_id);
+    if(!profile) throw new NotFoundException('Profile not found');
+
+    return await this.postsService.create(profile.id,createPostDto)
   }
 
   @Get()
