@@ -93,4 +93,10 @@ export class PostsService {
     await this.postRepo.restore(post.id);
     return { message: `Successfylly restored post - ${post.id}` };
   }
+
+  async findPostById(id:number) {
+    const post = await this.postRepo.findOne({where:{id}});
+    if(!post) throw new NotFoundException('Post not exist');
+    return post;
+  }
 }

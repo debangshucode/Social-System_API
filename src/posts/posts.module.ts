@@ -11,5 +11,6 @@ import { PostMapper } from './mapper/post.mapper';
   imports:[TypeOrmModule.forFeature([Post]),ProfilesModule],
   controllers: [PostsController],
   providers: [PostsService,PostMapper],
+  exports:[PostsService]
 })
 export class PostsModule {}
