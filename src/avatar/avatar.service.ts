@@ -17,8 +17,7 @@ export class AvatarService {
         const publicId = `avatars/users/${userId}/avatar_${userId}`;
 
         const paramString = `public_id=${publicId}&timestamp=${timeStamp}`;
-        console.log('String to sign:', paramString);
-        console.log('API Secret:', `"${this.config.get('CLOUDINARY_API_SECRET')}"`);
+        
         const signature = createHash('sha1').update(paramString + this.config.get('CLOUDINARY_API_SECRET')).digest('hex');
 
 
@@ -56,7 +55,7 @@ export class AvatarService {
                 await cloudinary.uploader.destroy(profile.cloudinary_public_id);
             }
             catch {
-                console.error(`[Avatar] Failed to delete old asset: ${profile.cloudinary_public_id}`)
+                console.error(`[Avatar] Failed to delete old asset: `)
             }
         }
 
@@ -96,7 +95,7 @@ export class AvatarService {
             await cloudinary.uploader.destroy(profile.cloudinary_public_id);
         }
         catch {
-            console.error(`[Avatar] cloudinary delete failed: ${profile.cloudinary_public_id}`);
+            console.error(`[Avatar] cloudinary delete failed:`);
         }
 
         await this.profileService.updateAvatar(userId, {
