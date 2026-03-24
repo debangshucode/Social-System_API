@@ -88,7 +88,7 @@ export class PostsService {
   async restore(id: number) {
     const post = await this.postRepo.findOne({ where: { id }, withDeleted: true });
     if (!post) throw new NotFoundException('No post found');
-    if (post.deleted_at !== null) return { message: 'This post is not deleted' };
+    if (post.deleted_at === null) return { message: 'This post is not deleted' };
 
     await this.postRepo.restore(post.id);
     return { message: `Successfylly restored post - ${post.id}` };

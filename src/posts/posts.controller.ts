@@ -9,6 +9,9 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { PostMapper } from './mapper/post.mapper';
 import { Paginate } from 'nestjs-paginate';
 import type { PaginateQuery } from 'nestjs-paginate';
+import { RoleGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { user_role } from 'src/users/entities/user.entity';
 
 @Controller('posts')
 @UseGuards(jwtAuthGuard)
@@ -19,6 +22,9 @@ export class PostsController {
   // * Role : Admin
 
   @Patch('/restore/:id')
+  @UseGuards(RoleGuard)
+  @Roles(user_role.ADMIN)
+  @ApiBearerAuth()
   restore(@Param('id', ParseIntPipe) id: number) {
     return this.postsService.restore(id)
   }
