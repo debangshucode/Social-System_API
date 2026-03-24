@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Post } from './entities/post.entity';
 import { profile } from 'console';
 import { ProfilesModule } from 'src/profiles/profiles.module';
+import { PostMapper } from './mapper/post.mapper';
 
 @Module({
   imports:[TypeOrmModule.forFeature([Post]),ProfilesModule],
   controllers: [PostsController],
-  providers: [PostsService],
+  providers: [PostsService,PostMapper],
 })
 export class PostsModule {}

@@ -1,34 +1,38 @@
 import { Comment } from "src/comments/entities/comment.entity";
 import { Like } from "src/likes/entities/like.entity";
 import { Profile } from "src/profiles/entities/profile.entity";
-import { Column,UpdateDateColumn, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, JoinColumn } from "typeorm";
+import { Column, UpdateDateColumn, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, JoinColumn } from "typeorm";
 
 @Entity('posts')
 export class Post {
     @PrimaryGeneratedColumn()
-    id:number;
+    id: number;
 
     @Column({
-        type:'text'
+        type: 'text'
     })
-    content:string;
+    content: string;
 
     @CreateDateColumn()
     created_at: Date;
 
     @UpdateDateColumn()
-    updated_at : Date;
-    
+    updated_at: Date;
+
     @DeleteDateColumn()
-    deleted_at :Date;
-    
-    @ManyToOne(()=>Profile,(profile)=>profile.posts)
-    @JoinColumn({name:'profile_id'})
-    profile : Profile;
+    deleted_at: Date;
 
-    @OneToMany(()=>Comment,(comments)=>comments.post)
-    comments:Comment[];
+    @ManyToOne(() => Profile, (profile) => profile.posts)
+    @JoinColumn({ name: 'profile_id' })
+    profile: Profile;
 
-    @OneToMany(()=>Like,(likes)=>likes.post)
-    likes:Like[];
+    @OneToMany(() => Comment, (comments) => comments.post)
+    comments: Comment[];
+
+    @OneToMany(() => Like, (likes) => likes.post)
+    likes: Like[];
+
+    // virtual 
+    likes_count?: number;      // runtime only ✔
+    comments_count?: number;   // runtime only ✔
 }

@@ -6,11 +6,14 @@ import { ProfilesService } from 'src/profiles/profiles.service';
 import type { Request } from 'express';
 import { jwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { PostMapper } from './mapper/post.mapper';
+import { Paginate } from 'nestjs-paginate';
+import type { PaginateQuery } from 'nestjs-paginate';
 
 @Controller('posts')
 @UseGuards(jwtAuthGuard)
 export class PostsController {
-  constructor(private readonly postsService: PostsService, private profileService: ProfilesService) { }
+  constructor(private readonly postsService: PostsService, private profileService: ProfilesService, private readonly postMapper: PostMapper,) { }
 
 
   // * Role : Admin
@@ -35,15 +38,25 @@ export class PostsController {
   // todo 
   // ~ Both admin and user
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  @ApiBearerAuth()
+  async findAll(@Paginate() query:PaginateQuery) {
+    const result = await this.postsService.findAll(query);
+    return {
+      ...result,
+      data:result.data.map(post=> this.postMapper.toListItem(post))
+    };
   }
 
   // todo
   // ~ Both admin and user
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
+  @ApiBearerAuth()
+  async findOne(@Req() req:Request,@Param('id',ParseIntPipe) id: number) {
+    const post = await this.postsService.findOne(id);
+    const {user_id} = req.user as {user_id:number};
+    const profile = await this.profileService.findByUserId(user_id);
+    if(!profile) throw new NotFoundException('Profile not found')
+    return this.postMapper.toDetail(post,profile.id)
   }
 
   // ~ Both admin and user
