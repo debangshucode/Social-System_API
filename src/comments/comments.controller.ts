@@ -39,11 +39,6 @@ export class CommentsController {
     }
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.commentsService.findOne(+id);
-  // }
-
 
   @Patch('/comments/:id')
   @Serialize(CommentDto)

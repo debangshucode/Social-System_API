@@ -1,34 +1,44 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Req, Param, Delete, ParseIntPipe, NotFoundException, UseGuards } from '@nestjs/common';
 import { LikesService } from './likes.service';
-import { CreateLikeDto } from './dto/create-like.dto';
-import { UpdateLikeDto } from './dto/update-like.dto';
-
-@Controller('likes')
+import { Paginate } from 'nestjs-paginate';
+import type { PaginateQuery } from 'nestjs-paginate';
+import type { Request } from 'express';
+import { ProfilesService } from 'src/profiles/profiles.service';
+import { PostsService } from 'src/posts/posts.service';
+import { jwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
+import { LikeUserDto } from './dto/like.dto';
+@Controller('posts/:postId/likes')
+@UseGuards(jwtAuthGuard)
+@ApiBearerAuth()
 export class LikesController {
-  constructor(private readonly likesService: LikesService) {}
+  constructor(private readonly likesService: LikesService, private readonly profileService: ProfilesService, private readonly postService: PostsService) { }
 
   @Post()
-  create(@Body() createLikeDto: CreateLikeDto) {
-    return this.likesService.create(createLikeDto);
+  async create(@Req() req: Request, @Param('postId', ParseIntPipe) id: number) {
+    const { user_id } = req.user as { user_id: number };
+    const profile = await this.profileService.findByUserId(user_id);
+    if (!profile) throw new NotFoundException('Profile not found');
+    return this.likesService.create(profile.id, id);
   }
 
   @Get()
-  findAll() {
-    return this.likesService.findAll();
+  async findAll(@Paginate() query:PaginateQuery, @Param('postId', ParseIntPipe) id: number) {
+    const result = await this.likesService.findAll(query,id);
+    return {
+      ...result,
+      data:plainToInstance(LikeUserDto,result.data,{
+        excludeExtraneousValues:true,
+      })
+    }
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.likesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLikeDto: UpdateLikeDto) {
-    return this.likesService.update(+id, updateLikeDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.likesService.remove(+id);
+  @Delete()
+  async remove(@Req() req: Request, @Param('postId', ParseIntPipe) id: number) {
+    const { user_id } = req.user as { user_id: number };
+    const profile = await this.profileService.findByUserId(user_id);
+    if (!profile) throw new NotFoundException('Profile not found');
+    return this.likesService.remove(profile.id,id);
   }
 }
