@@ -51,6 +51,7 @@ export class AuthController {
   @UseGuards(jwtRefreshGuard)
   @ApiOperation({ summary: 'Refresh the access token using the refresh cookie' })
   @ApiCookieAuth('refresh_token')
+  @ApiBearerAuth()
   @ApiOkResponse({ schema: { example: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' } } })
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { user_id, email, role } = req.user as { user_id: number, email: string, role: user_role };
@@ -82,7 +83,7 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/auth/refresh',
+      path: '/auth',
     })
   }
 }

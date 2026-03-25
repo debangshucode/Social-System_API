@@ -9,13 +9,22 @@ import { LikesModule } from './likes/likes.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-import { APP_PIPE } from '@nestjs/core';
+import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { AvatarModule } from './avatar/avatar.module';
 import jwtConfig from './config/jwt.config';
 import Joi from 'joi';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      throttlers:[
+        {
+          ttl:1000,
+          limit:10
+        }
+      ]
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       
@@ -62,6 +71,10 @@ import Joi from 'joi';
       forbidNonWhitelisted: true,
       transform: true,
     })
-  }],
+  },
+{
+  provide:APP_GUARD,
+  useClass:ThrottlerGuard
+}],
 })
 export class AppModule { }
