@@ -72,7 +72,7 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      path: '/auth/refresh',
+      path: '/auth',
     });
     return { message: 'Logged Out' };
   }
