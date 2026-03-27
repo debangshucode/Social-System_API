@@ -38,23 +38,32 @@ export class PostsService {
     return await this.postRepo.save(post)
   }
 
-  async findAll(query:PaginateQuery) {
-    const db =  this.postRepo
+  async findAll(query: PaginateQuery) {
+    const minLikes = Number(query.filter?.minLikes ?? 0)
+
+    const db = this.postRepo
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.profile', 'author')
       .leftJoinAndSelect('author.user', 'user')
+      .leftJoin('post.likes', 'like')
       .loadRelationCountAndMap('post.likes_count', 'post.likes')
       .loadRelationCountAndMap('post.comments_count', 'post.comments')
-      
-      return paginate(query,db,{
-        sortableColumns:['created_at'],
-        defaultSortBy:[['created_at','DESC']],
-        searchableColumns:['content'],
-        filterableColumns:{
-          likes_count:[FilterOperator.GT]
-        }, 
-        defaultLimit:2
-      })
+      .groupBy('post.id')
+      .addGroupBy('author.id')
+      .addGroupBy('user.id');
+
+    if (minLikes > 0) {
+      db.having('COUNT(like.id)>:minLikes', { minLikes })
+    }
+    return paginate(query, db, {
+      sortableColumns: ['created_at'],
+      defaultSortBy: [['created_at', 'DESC']],
+      searchableColumns: ['content'],
+      filterableColumns:{
+        deleted_at:[FilterOperator.EQ]
+      },
+      defaultLimit: 2
+    })
   }
 
   async findOne(id: number) {
@@ -98,9 +107,9 @@ export class PostsService {
     return { message: `Successfylly restored post - ${post.id}` };
   }
 
-  async findPostById(id:number) {
-    const post = await this.postRepo.findOne({where:{id}});
-    if(!post) throw new NotFoundException('Post not exist');
+  async findPostById(id: number) {
+    const post = await this.postRepo.findOne({ where: { id } });
+    if (!post) throw new NotFoundException('Post not exist');
     return post;
   }
 }

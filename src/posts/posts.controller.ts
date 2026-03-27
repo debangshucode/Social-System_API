@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, NotFoundException, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, NotFoundException, UseGuards, ParseIntPipe, Res, Render } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { ProfilesService } from 'src/profiles/profiles.service';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { jwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { PostMapper } from './mapper/post.mapper';
@@ -29,27 +29,49 @@ export class PostsController {
     return this.postsService.restore(id)
   }
 
+
+  // * ejs
+  @Get('/upload')
+  uploadPostpage(@Res() res: Response) {
+    res.render('post/uploadPost', {
+      title: 'Upload post',
+      error: null
+    })
+  }
+
   // * Role : User
 
   @Post()
   @ApiBearerAuth()
-  async create(@Req() req: Request, @Body() createPostDto: CreatePostDto) {
-    const { user_id } = req.user as { user_id: number };
-    const profile = await this.profileService.findByUserId(user_id);
-    if (!profile) throw new NotFoundException('Profile not found');
+  @UseGuards(jwtAuthGuard)
+  async create(@Req() req: Request, @Body() createPostDto: CreatePostDto, @Res() res: Response) {
+    try {
+      const { user_id } = req.user as { user_id: number };
+      const profile = await this.profileService.findByUserId(user_id);
+      if (!profile) throw new NotFoundException('Profile not found');
 
-    return await this.postsService.create(profile.id, createPostDto)
+      await this.postsService.create(profile.id, createPostDto)
+
+      return res.redirect('posts');
+    }
+    catch (err) {
+      return res.render('post/uploadPost', {
+        title: 'Upload post',
+        error: err.message || 'Something went wrong',
+      });
+    }
   }
 
   // todo 
   // ~ Both admin and user
   @Get()
   @ApiBearerAuth()
-  async findAll(@Paginate() query:PaginateQuery) {
+  @Render('post/listPosts')
+  async findAll(@Paginate() query: PaginateQuery) {
     const result = await this.postsService.findAll(query);
     return {
       ...result,
-      data:result.data.map(post=> this.postMapper.toListItem(post))
+      data: result.data.map(post => this.postMapper.toListItem(post))
     };
   }
 
@@ -57,12 +79,12 @@ export class PostsController {
   // ~ Both admin and user
   @Get(':id')
   @ApiBearerAuth()
-  async findOne(@Req() req:Request,@Param('id',ParseIntPipe) id: number) {
+  async findOne(@Req() req: Request, @Param('id', ParseIntPipe) id: number) {
     const post = await this.postsService.findOne(id);
-    const {user_id} = req.user as {user_id:number};
+    const { user_id } = req.user as { user_id: number };
     const profile = await this.profileService.findByUserId(user_id);
-    if(!profile) throw new NotFoundException('Profile not found')
-    return this.postMapper.toDetail(post,profile.id)
+    if (!profile) throw new NotFoundException('Profile not found')
+    return this.postMapper.toDetail(post, profile.id)
   }
 
   // ~ Both admin and user

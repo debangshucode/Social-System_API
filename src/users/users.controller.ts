@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, Req, UseGuards, ParseIntPipe, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, Req, UseGuards, ParseIntPipe, NotFoundException, Render } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import type { Request } from 'express';
@@ -54,16 +54,17 @@ export class UsersController {
   }
 
   @Get('/me')
-  @Serialize(UserDto)
+  // @Serialize(UserDto)
   @UseGuards(jwtAuthGuard)
   @ApiOperation({ summary: 'Get the current user profile' })
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserDto })
+  @Render('users/list')
   async getCurUser(@Req() req: Request) {
     const { user_id } = req.user as { user_id: number };
     const user = await this.usersService.findOne(user_id);
     if (!user) throw new NotFoundException('User not found !');
-    return user;
+    return {user,title:user.first_name+" "+user.last_name.split('')[0]};
   }
 
   //^ ===== ADMIN  Routes ====

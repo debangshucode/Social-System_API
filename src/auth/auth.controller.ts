@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -16,6 +16,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { title } from 'process';
 
 
 @ApiTags('Auth')
@@ -34,17 +35,40 @@ export class AuthController {
     return { accessToken: tokens.accessToken, user };
   }
 
+  @Get('/login')
+  loginpage(@Res() res: Response) {
+    res.render('auth/login', {
+      title: 'login',
+      error: null
+    });
+  }
+
   @Post('/login')
   @Serialize(AuthResponseDto)
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiBody({ type: LoginDto })
   @ApiOkResponse({ type: AuthResponseDto })
-  async signin(@Body() logInDto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    const { tokens, user } = await this.authService.login(logInDto);
-    this.setRefreshCookie(res, tokens.refreshToken);
-    return {
-      accessToken: tokens.accessToken, user
-    };
+  async signin(@Body() logInDto: LoginDto, @Res() res: Response) {
+    try {
+      const { tokens, user } = await this.authService.login(logInDto);
+      this.setRefreshCookie(res, tokens.refreshToken);
+
+      res.cookie('access_token', tokens.accessToken, {
+        httpOnly: true,
+      });
+      res.cookie('refresh_token',tokens.refreshToken,{
+        httpOnly:true
+      })
+
+      return res.redirect(`/users/me`)
+    }
+    catch(err){
+      return res.render('auth/login',{
+        title:'login',
+        error:err,
+      })
+    }
+    
   }
 
   @Post('/refresh')
