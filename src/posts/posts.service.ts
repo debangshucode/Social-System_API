@@ -8,7 +8,7 @@ import { object } from 'joi';
 import { Profile } from 'src/profiles/entities/profile.entity';
 import { user_role } from 'src/users/entities/user.entity';
 import { profile } from 'console';
-import { paginate, PaginateQuery } from 'nestjs-paginate';
+import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class PostsService {
@@ -49,7 +49,11 @@ export class PostsService {
       return paginate(query,db,{
         sortableColumns:['created_at'],
         defaultSortBy:[['created_at','DESC']],
-        defaultLimit:10
+        searchableColumns:['content'],
+        filterableColumns:{
+          likes_count:[FilterOperator.GT]
+        }, 
+        defaultLimit:2
       })
   }
 
