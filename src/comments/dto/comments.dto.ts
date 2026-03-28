@@ -8,7 +8,7 @@ class ProfileResponseDto {
   user_name: string;
 
   @Expose()
-  avatar: string | null;;
+  avatar_url: string | null;
 }
 
 export class CommentDto {

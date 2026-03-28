@@ -65,7 +65,7 @@ export class PostsController {
   // todo 
   // ~ Both admin and user
   @Get()
-//  @Render('post/listPosts')
+ @Render('post/listPosts')
   async findAll(@Paginate() query: PaginateQuery, @Req() req:Request) {
     const {user_id} = req.user as {user_id:number};
     const result = await this.postsService.findAll(query);

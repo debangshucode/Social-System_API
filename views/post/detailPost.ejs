@@ -17,30 +17,36 @@
 
 <body class="w-full h-screen text-white justify-start flex-col gap-5 p-2">
 
-  <div class="max-w-7xl mt-20 mx-auto border-2 p-2 mb-4 flex flex-wrap  items-center gap-5 rounded-md">
+  <div class="max-w-7xl mt-20 mx-auto border-2 p-2 mb-4 flex flex-wrap items-center gap-5 rounded-md">
 
-    <!-- *Profile image and date -->
+    <!-- Profile -->
     <div class="flex items-center gap-2">
-      <div class="w-20 h-20 rounded-2xl border-2 border-blue-500"><img src="<%=post.author?.avatar_url ?? 'NO image'%>" alt="" class="bg-cover rounded-2xl"></div>
+      <div class="w-20 h-20 rounded-2xl border-2 border-blue-500">
+        <img src="<%=post.author?.avatar_url ?? ''%>" class="rounded-2xl">
+      </div>
       <div>
-        <p><strong class="text-xl text-white border border-2 border-blue-900 px-2 rounded-md bg-blue-500 mb-4">@<%= post.author.user_name %></strong></p>
+        <p>
+          <strong class="text-xl text-white border border-2 border-blue-900 px-2 rounded-md bg-blue-500 mb-4">
+            @<%= post.author.user_name %>
+          </strong>
+        </p>
         <small class="text-green-500 font-bold">
           <%= new Date(post.created_at).toLocaleString() %>
         </small>
       </div>
     </div>
 
-    <!-- * content -->
+    <!-- Content -->
     <div class="w-full">
 
-      <p class="text-xl text-black mb-5 ">
+      <p class="text-xl text-black mb-5">
         <%= post.content %>
       </p>
 
-      <!-- * Likes and comments counts -->
-      <div class="display flex h-fit border-b-2 border-gray">
-        <small class="text-blue-500 mt-8 ">
-          <form action="/posts/<%= post.id %>/likes" method="POST" class="text-blue-500 h-fit w-fit ">
+      <!-- Likes & Comments -->
+      <div class="flex h-fit border-b-2 border-gray">
+        <small class="text-blue-500 mt-8">
+          <form action="/posts/<%= post.id %>/likes" method="POST">
             <button type="submit" class="flex items-center gap-1">
               <i class="fa-regular fa-heart"></i>
               Likes: <%= post.likes_count %>
@@ -54,47 +60,134 @@
         </small>
       </div>
 
-      <!-- 3 recent comments  -->
-      <div class="mb-4">
+      <!-- PREVIEW COMMENTS (SSR) -->
+      <div id="comments-preview" class="mb-4">
         <% if (post.comments_preview && post.comments_preview.length > 0) { %>
-        <% post.comments_preview.forEach(comments => { %>
-        <div class="mt-5">
-
-          <div class="flex items-center gap-2">
-            <div class="w-10 h-10 self-start rounded-2xl border-2 border-blue-500"><img src="<%=comments?.author?.avatar_url ?? 'NO image'%>" alt="no img" class="bg-cover rounded-2xl"></div>
-            <div>
-              <p><strong class="text-md text-white border border-2 border-blue-900 px-2 rounded-md bg-blue-500 mb-4">@<%= comments.author.user_name %></strong></p>
-              <small class="text-green-500 font-bold">
-                <%= new Date(post.created_at).toLocaleString() %>
-              </small>
-              <p class="text-black">
-                <%=comments.content  %>
-              </p>
+          <% post.comments_preview.forEach(comments => { %>
+            <div class="mt-5">
+              <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-2xl border-2 border-blue-500">
+                  <img src="<%=comments?.author?.avatar_url ?? ''%>" class="rounded-2xl">
+                </div>
+                <div>
+                  <p>
+                    <strong class="text-md text-white border border-2 border-blue-900 px-2 rounded-md bg-blue-500 mb-4">
+                      @<%= comments.author.user_name %>
+                    </strong>
+                  </p>
+                  <small class="text-green-500 font-bold">
+                    <%= new Date(comments.created_at).toLocaleString() %>
+                  </small>
+                  <p class="text-black">
+                    <%= comments.content %>
+                  </p>
+                </div>
+              </div>
             </div>
-
-          </div>
-
-        </div>
-        <% }) %>
-
-
+          <% }) %>
         <% } else { %>
-        <p>No comments yet.</p>
+          <p>No comments yet.</p>
         <% } %>
       </div>
 
+      <!-- ALL COMMENTS (API will fill) -->
+      <div id="all-comments" class="mb-4 hidden"></div>
+
+      <!-- SEE MORE BUTTON -->
+      <% if (post.comments_count > 3) { %>
+      <div class="text-center mt-2">
+        <button id="toggle-comments-btn" class="text-blue-500 font-semibold hover:underline">
+          See more comments
+        </button>
+      </div>
+      <% } %>
+
       <div class="border-2 border-gray mx-20 mb-4"></div>
-      <!-- post comment -->
-        <form action="/posts/<%= post.id %>/comments" method="POST" class="text-white flex justify-between gap-2 font-semibold h-fit w-full border-2 rounded-3xl p-2 bg-blue-500">
-            <textarea type="text" name="content" class="w-[95%] rounded-3xl text-black p-2"></textarea>
-            <button type="submit" class="text-2xl mr-6">
-               <i class="fa-solid fa-paper-plane"></i>
-          </button>
-        </form>
+
+      <!-- Add Comment -->
+      <form action="/posts/<%= post.id %>/comments" method="POST"
+        class="text-white flex justify-between gap-2 font-semibold w-full border-2 rounded-3xl p-2 bg-blue-500">
+        <textarea name="content" class="w-[95%] rounded-3xl text-black p-2"></textarea>
+        <button type="submit" class="text-2xl mr-6">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </form>
 
     </div>
 
   </div>
+
+  <!-- SCRIPT -->
+  <script>
+    const btn = document.getElementById("toggle-comments-btn");
+    const preview = document.getElementById("comments-preview");
+    const all = document.getElementById("all-comments");
+
+    const postId = "<%= post.id %>";
+
+    let expanded = false;
+    let loaded = false;
+    let page = 1;
+
+    async function fetchComments() {
+      try {
+        const res = await fetch(`/posts/${postId}/comments?page=${page}&limit=5`);
+        const data = await res.json();
+        return data.data || [];
+      } catch (err) {
+        console.error("Error fetching comments:", err);
+        return [];
+      }
+    }
+
+    function renderComments(comments) {
+      const html = comments.map(comment => `
+        <div class="mt-5">
+          <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-2xl border-2 border-blue-500">
+              <img src="${comment.profile?.avatar_url || ''}" class="rounded-2xl">
+            </div>
+            <div>
+              <p>
+                <strong class="text-md text-white border border-2 border-blue-900 px-2 rounded-md bg-blue-500 mb-4">
+                  @${comment.profile.user_name}
+                </strong>
+              </p>
+              <small class="text-green-500 font-bold">
+                ${new Date(comment.created_at).toLocaleString()}
+              </small>
+              <p class="text-black">${comment.content}</p>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      all.innerHTML += html;
+    }
+
+    if (btn) {
+      btn.addEventListener("click", async () => {
+        expanded = !expanded;
+
+        if (expanded) {
+          preview.classList.add("hidden");
+          all.classList.remove("hidden");
+          btn.innerText = "Show less";
+
+          if (!loaded) {
+            const comments = await fetchComments();
+            renderComments(comments);
+            loaded = true;
+          }
+
+        } else {
+          preview.classList.remove("hidden");
+          all.classList.add("hidden");
+          btn.innerText = "See more comments";
+        }
+      });
+    }
+  </script>
 
 </body>
 

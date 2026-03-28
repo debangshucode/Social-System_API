@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Res, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res, Req, UseGuards, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -24,7 +24,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   // *EJS
-   @Get('/Onboard')
+  @Get('/Onboard')
   loginpage(@Res() res: Response) {
     res.render('auth/login', {
       title: 'login',
@@ -32,7 +32,7 @@ export class AuthController {
     });
   }
 
-  
+
   // *other routs
 
   @Post('/signup')
@@ -42,12 +42,8 @@ export class AuthController {
   async signup(@Body() registerDto: RegisterDto, @Res() res: Response) {
     try {
       const { tokens, user } = await this.authService.register(registerDto);
-      res.cookie('access_token', tokens.accessToken, {
-        httpOnly: true,
-      });
-      res.cookie('refresh_token', tokens.refreshToken, {
-        httpOnly: true
-      })
+      this.setAccessCookie(res, tokens.accessToken);
+      this.setAccessCookie(res, tokens.refreshToken);
 
       return res.redirect(`/profiles/me`)
     }
@@ -59,7 +55,7 @@ export class AuthController {
     }
   }
 
- 
+
 
   @Post('/login')
   @Serialize(AuthResponseDto)
@@ -69,14 +65,10 @@ export class AuthController {
   async signin(@Body() logInDto: LoginDto, @Res() res: Response) {
     try {
       const { tokens, user } = await this.authService.login(logInDto);
-      this.setRefreshCookie(res, tokens.refreshToken);
 
-      res.cookie('access_token', tokens.accessToken, {
-        httpOnly: true,
-      });
-      res.cookie('refresh_token', tokens.refreshToken, {
-        httpOnly: true
-      })
+
+      this.setAccessCookie(res, tokens.accessToken);
+      this.setAccessCookie(res, tokens.refreshToken);
 
       return res.redirect(`/profiles/me`)
     }
@@ -88,6 +80,24 @@ export class AuthController {
     }
 
   }
+
+  // for ejs
+  @Get('/refresh')
+  @UseGuards(jwtRefreshGuard)
+  async refreshPage(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Query('next') next?: string,
+  ) {
+    const { user_id, email, role } = req.user as { user_id: number; email: string; role: user_role };
+    const tokens = await this.authService.refresh(user_id, email, role);
+
+    this.setAccessCookie(res, tokens.accessToken);
+    this.setRefreshCookie(res, tokens.refreshToken);
+
+    return res.redirect(next || '/profiles/me');
+  }
+
 
   @Post('/refresh')
   @UseGuards(jwtRefreshGuard)
@@ -98,6 +108,9 @@ export class AuthController {
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { user_id, email, role } = req.user as { user_id: number, email: string, role: user_role };
     const tokens = await this.authService.refresh(user_id, email, role);
+
+    this.setAccessCookie(res, tokens.accessToken);   // add this
+
     this.setRefreshCookie(res, tokens.refreshToken);
     return { accessToken: tokens.accessToken };
   }
@@ -110,9 +123,19 @@ export class AuthController {
   async logout(@Req() req: Request, @Res() res: Response) {
     const { user_id } = req.user as { user_id: number };
     await this.authService.logout(user_id);
-    res.clearCookie('access_token')
-    res.clearCookie('refresh_token');
+    res.clearCookie('access_token',{path:'/'})
+    res.clearCookie('refresh_token',{path:'/auth'});
     return res.redirect('Onboard');
+  }
+
+  private setAccessCookie(res: Response, token: string) {
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 15 * 60 * 1000, // 15 min
+    });
   }
 
   private setRefreshCookie(res: Response, token: string) {
