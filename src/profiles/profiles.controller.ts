@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards, ParseIntPipe, Render } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -12,11 +12,15 @@ import { plainToInstance } from 'class-transformer';
 import { RoleGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { user_role } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
+import { PostsService } from 'src/posts/posts.service';
+import { PostMapper } from 'src/posts/mapper/post.mapper';
 @Controller('profiles')
 @UseGuards(jwtAuthGuard)
 export class ProfilesController {
-  constructor(private readonly profilesService: ProfilesService) { }
+  constructor(private readonly profilesService: ProfilesService, private readonly userService:UsersService, private postService:PostsService, private readonly postMapper: PostMapper) { }
 
+  
   // ** role-user
   @Post()
   @ApiBearerAuth()
@@ -27,11 +31,17 @@ export class ProfilesController {
   }
 
   @Get('/me')
+  @UseGuards(jwtAuthGuard)
   @ApiBearerAuth()
-  @Serialize(ProfileDto)
-  findOne(@Req() req: Request) {
+  @Render('users/dashboard')
+  async findOne(@Req() req: Request,@Paginate() query:PaginateQuery) {
     const { user_id } = req.user as { user_id: number };
-    return this.profilesService.findOne(user_id);
+    const user = await this.userService.findOne(user_id);
+    const profile = await this.profilesService.findOne(user_id);
+    const result = await this.postService.findAll(query)
+    const posts = {...result,data:result.data.map(post=>this.postMapper.toListItem(post,profile.id))}
+
+    return{user,profile,posts}
   }
 
   @Patch('/me/edit')

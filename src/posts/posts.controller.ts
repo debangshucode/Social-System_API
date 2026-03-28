@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, NotFoundException, UseGuards, ParseIntPipe, Res, Render } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, NotFoundException, UseGuards, ParseIntPipe, Res, Render, Inject, forwardRef } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -16,7 +16,7 @@ import { user_role } from 'src/users/entities/user.entity';
 @Controller('posts')
 @UseGuards(jwtAuthGuard)
 export class PostsController {
-  constructor(private readonly postsService: PostsService, private profileService: ProfilesService, private readonly postMapper: PostMapper,) { }
+  constructor(private readonly postsService: PostsService,@Inject(forwardRef(()=>ProfilesService)) private profileService: ProfilesService, private readonly postMapper: PostMapper,) { }
 
 
   // * Role : Admin
@@ -52,7 +52,7 @@ export class PostsController {
 
       await this.postsService.create(profile.id, createPostDto)
 
-      return res.redirect('posts');
+      return res.redirect('/profiles/me')
     }
     catch (err) {
       return res.render('post/uploadPost', {
@@ -65,26 +65,28 @@ export class PostsController {
   // todo 
   // ~ Both admin and user
   @Get()
-  @ApiBearerAuth()
-  @Render('post/listPosts')
-  async findAll(@Paginate() query: PaginateQuery) {
+//  @Render('post/listPosts')
+  async findAll(@Paginate() query: PaginateQuery, @Req() req:Request) {
+    const {user_id} = req.user as {user_id:number};
     const result = await this.postsService.findAll(query);
+    const profile = await this.profileService.findByUserId(user_id);
+    if(!profile) throw new NotFoundException('no profile found ')
     return {
       ...result,
-      data: result.data.map(post => this.postMapper.toListItem(post))
+      data: result.data.map(post => this.postMapper.toListItem(post,profile?.id))
     };
   }
 
   // todo
   // ~ Both admin and user
   @Get(':id')
-  @ApiBearerAuth()
+  @Render('post/detailPost')
   async findOne(@Req() req: Request, @Param('id', ParseIntPipe) id: number) {
     const post = await this.postsService.findOne(id);
     const { user_id } = req.user as { user_id: number };
     const profile = await this.profileService.findByUserId(user_id);
     if (!profile) throw new NotFoundException('Profile not found')
-    return this.postMapper.toDetail(post, profile.id)
+    return {post:this.postMapper.toDetail(post, profile.id)}
   }
 
   // ~ Both admin and user

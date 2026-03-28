@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Req, Param, Delete, ParseIntPipe, NotFoundException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, Param, Delete, ParseIntPipe, NotFoundException, UseGuards, Res } from '@nestjs/common';
 import { LikesService } from './likes.service';
 import { Paginate } from 'nestjs-paginate';
 import type { PaginateQuery } from 'nestjs-paginate';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { ProfilesService } from 'src/profiles/profiles.service';
 import { PostsService } from 'src/posts/posts.service';
 import { jwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -16,29 +16,32 @@ export class LikesController {
   constructor(private readonly likesService: LikesService, private readonly profileService: ProfilesService, private readonly postService: PostsService) { }
 
   @Post()
-  async create(@Req() req: Request, @Param('postId', ParseIntPipe) id: number) {
+  async create(@Req() req: Request, @Param('postId', ParseIntPipe) id: number, @Res() res: Response) {
     const { user_id } = req.user as { user_id: number };
     const profile = await this.profileService.findByUserId(user_id);
     if (!profile) throw new NotFoundException('Profile not found');
-    return this.likesService.create(profile.id, id);
+    await this.likesService.create(profile.id, id);
+    return res.redirect('/profiles/me')
+    // return this.likesService.create(profile.id, id);
   }
 
   @Get()
-  async findAll(@Paginate() query:PaginateQuery, @Param('postId', ParseIntPipe) id: number) {
-    const result = await this.likesService.findAll(query,id);
+  async findAll(@Paginate() query: PaginateQuery, @Param('postId', ParseIntPipe) id: number) {
+    const result = await this.likesService.findAll(query, id);
     return {
       ...result,
-      data:plainToInstance(LikeUserDto,result.data,{
-        excludeExtraneousValues:true,
+      data: plainToInstance(LikeUserDto, result.data, {
+        excludeExtraneousValues: true,
       })
     }
   }
 
   @Delete()
-  async remove(@Req() req: Request, @Param('postId', ParseIntPipe) id: number) {
+  async remove(@Req() req: Request, @Param('postId', ParseIntPipe) id: number ,@Res() res:Response) {
     const { user_id } = req.user as { user_id: number };
     const profile = await this.profileService.findByUserId(user_id);
     if (!profile) throw new NotFoundException('Profile not found');
-    return this.likesService.remove(profile.id,id);
+    await this.likesService.remove(profile.id, id);
+    return res.redirect('/profiles/me')
   }
 }

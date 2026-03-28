@@ -16,7 +16,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { title } from 'process';
 
 
 @ApiTags('Auth')
@@ -24,24 +23,43 @@ import { title } from 'process';
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
-  @Post('/signup')
-  @Serialize(AuthResponseDto)
-  @ApiOperation({ summary: 'Register a new user' })
-  @ApiBody({ type: RegisterDto })
-  @ApiOkResponse({ type: AuthResponseDto })
-  async signup(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) res: Response) {
-    const { tokens, user } = await this.authService.register(registerDto);
-    this.setRefreshCookie(res, tokens.refreshToken);
-    return { accessToken: tokens.accessToken, user };
-  }
-
-  @Get('/login')
+  // *EJS
+   @Get('/Onboard')
   loginpage(@Res() res: Response) {
     res.render('auth/login', {
       title: 'login',
       error: null
     });
   }
+
+  
+  // *other routs
+
+  @Post('/signup')
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiBody({ type: RegisterDto })
+  @ApiOkResponse({ type: AuthResponseDto })
+  async signup(@Body() registerDto: RegisterDto, @Res() res: Response) {
+    try {
+      const { tokens, user } = await this.authService.register(registerDto);
+      res.cookie('access_token', tokens.accessToken, {
+        httpOnly: true,
+      });
+      res.cookie('refresh_token', tokens.refreshToken, {
+        httpOnly: true
+      })
+
+      return res.redirect(`/profiles/me`)
+    }
+    catch (err) {
+      return res.render('auth/login', {
+        title: 'login',
+        error: err,
+      })
+    }
+  }
+
+ 
 
   @Post('/login')
   @Serialize(AuthResponseDto)
@@ -56,19 +74,19 @@ export class AuthController {
       res.cookie('access_token', tokens.accessToken, {
         httpOnly: true,
       });
-      res.cookie('refresh_token',tokens.refreshToken,{
-        httpOnly:true
+      res.cookie('refresh_token', tokens.refreshToken, {
+        httpOnly: true
       })
 
-      return res.redirect(`/users/me`)
+      return res.redirect(`/profiles/me`)
     }
-    catch(err){
-      return res.render('auth/login',{
-        title:'login',
-        error:err,
+    catch (err) {
+      return res.render('auth/login', {
+        title: 'login',
+        error: err,
       })
     }
-    
+
   }
 
   @Post('/refresh')
@@ -89,16 +107,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout the current user' })
   @ApiBearerAuth()
   @ApiOkResponse({ schema: { example: { message: 'Logged Out' } } })
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async logout(@Req() req: Request, @Res() res: Response) {
     const { user_id } = req.user as { user_id: number };
     await this.authService.logout(user_id);
-    res.clearCookie('refresh_token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/auth',
-    });
-    return { message: 'Logged Out' };
+    res.clearCookie('access_token')
+    res.clearCookie('refresh_token');
+    return res.redirect('Onboard');
   }
 
   private setRefreshCookie(res: Response, token: string) {

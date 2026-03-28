@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Req, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Req, BadRequestException, UseGuards, Res } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { ProfilesService } from 'src/profiles/profiles.service';
 import { jwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -21,11 +21,13 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService, private readonly profileService: ProfilesService) { }
 
   @Post('/posts/:postId/comments')
-  async create(@Req() req: Request, @Param('postId', ParseIntPipe) postId: number, @Body() createCommentDto: CreateCommentDto) {
+  async create(@Req() req: Request, @Param('postId', ParseIntPipe) postId: number, @Body() createCommentDto: CreateCommentDto , @Res() res:Response) {
     const { user_id } = req.user as { user_id: number };
     const profile = await this.profileService.findByUserId(user_id)
     if (!profile) throw new BadRequestException('You much create a profile before comment ! Profile not found')
-    return this.commentsService.create(profile.id, postId, createCommentDto);
+    await this.commentsService.create(profile.id, postId, createCommentDto);
+
+    return res.redirect(`/posts/${postId}`)
   }
 
   @Get('/posts/:postId/comments')

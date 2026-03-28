@@ -18,7 +18,7 @@ export class PostMapper {
         }
     }
 
-    toListItem(post: Post): PostListItemResponseDto {
+    toListItem(post: Post,reqProfileID: number): PostListItemResponseDto {
         return {
             id: post.id,
             content: post.content,
@@ -27,12 +27,13 @@ export class PostMapper {
             author: this.toAuthorDto(post.profile),
             likes_count: Number(post.likes_count),
             comments_count: Number(post.comments_count),
+             liked_by_me: post.likes.some(l => l.profile.id === reqProfileID),
         }
     }
 
     toDetail(post: Post, reqProfileID: number): PostDetailResponseDto {
         return {
-            ...this.toListItem(post),
+            ...this.toListItem(post,reqProfileID),
             liked_by_me: post.likes.some(l => l.profile.id === reqProfileID),
             comments_preview: (post.comments ?? []).slice(0, 3).map(c => ({
                 id: c.id,

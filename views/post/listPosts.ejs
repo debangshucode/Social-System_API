@@ -4,37 +4,81 @@
 <head>
   <title>Posts</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/9cb5b88483.js" crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Manrope", sans-serif;
+    }
+  </style>
 </head>
 
-<body class='w-full h-screen bg-gray-700 text-white justify-start flex-col gap-5 p-2'>
+<body class="w-full h-screen text-white justify-start flex-col gap-5 p-2">
+  <div class="flex flex-wrap justify-center ">
+    <!-- Posts List -->
+    <% if (data && data.length > 0) { %>
+    <% data.forEach(post => { %>
+    <div class="border border-2 p-2 mb-4 flex flex-wrap  items-center w-[70%] hover:cursor-pointer gap-5 rounded-md" onclick="window.location.href='/posts/<%= post.id%>'">
+
+      <!-- *Profile image and date -->
+      <div class="flex items-center gap-2">
+        <div class="w-20 h-20 rounded-2xl border-2 border-blue-500"><img src="<%=post.author?.avatar_url ?? 'NO image'%>" alt="" class="bg-cover rounded-2xl"></div>
+        <div>
+          <p><strong class="text-xl text-white border border-2 border-blue-900 px-2 rounded-md bg-blue-500 mb-4">@<%= post.author.user_name %></strong></p>
+          <small class="text-green-500 font-bold">
+            <%= new Date(post.created_at).toLocaleString() %>
+          </small>
+        </div>
+      </div>
+
+      <!-- * content -->
+      <div class="w-full">
+
+        <p class="text-xl text-black mb-5 "><%= post.content %></p>
+
+        <!-- * Likes and comments counts -->
+        <div class="display flex h-fit">
+          <small class="text-blue-500 mt-8 ">
+
+            <% if (!post.liked_by_me) { %>
+            <form action="/posts/<%= post.id %>/likes" method="POST" class="text-blue-500 h-fit w-fit ">
+              <button type="submit" class="flex items-center gap-1">
+                <i class="fa-regular fa-heart"></i>
+                Likes: <%= post.likes_count %>
+              </button>
+            </form>
+
+            <% }else{ %>
+            <form action="/posts/<%= post.id %>/likes?_method=DELETE" method="POST" class="text-blue-500 h-fit w-fit ">
+              <button type="submit" class="flex items-center gap-1">
+                <i class="fa-solid fa-heart"></i>
+
+                Likes: <%= post.likes_count %>
+              </button>
+            </form>
+            <% } %>
 
 
-  <h1 class="text-2xl font-bold mb-4">All Posts</h1>
+          </small>
 
-  <!-- Posts List -->
-  <% if (data && data.length > 0) { %>
-  <% data.forEach(post => { %>
-  <div class="border border-2 p-2 bg-gray-500 mb-4">
+          <small class="text-blue-500 mt-8 ml-10">
+            <i class="fa-regular fa-comment"></i>
+            Comments: <%= post.comments_count %>
+          </small>
+        </div>
+      </div>
 
-    <p ><strong class="border border-2 border-red-900 px-2 rounded-md bg-red-700 mb-4">@<%= post.author.user_name %></strong></p>
+    </div>
 
-    <p class="text-xl"><%= post.content %></p>
+    <% }) %>
 
-    <small class="text-green-500 font-bold">
-      Created: <%= new Date(post.created_at).toLocaleString() %>
-    </small>
-    <br />
 
-    <small class="text-blue-500">
-      Likes: <%= post.likes_count %> |
-      Comments: <%= post.comments_count %>
-    </small>
-
+    <% } else { %>
+    <p>No posts found.</p>
+    <% } %>
   </div>
-  <% }) %>
-  <% } else { %>
-  <p>No posts found.</p>
-  <% } %>
 
   <!-- Pagination -->
   <div style="margin-top:20px;">
@@ -52,7 +96,6 @@
     <% } %>
 
   </div>
-
 
 </body>
 

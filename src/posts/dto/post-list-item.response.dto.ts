@@ -16,6 +16,8 @@ export class PostListItemResponseDto {
 
     @ApiProperty({ example: 10 })
     likes_count: number;
+    
+    liked_by_me: boolean;
     @ApiProperty({ example: 3 })
     comments_count: number;
     // ← No liked_by_me — too expensive for list, requires full likes join

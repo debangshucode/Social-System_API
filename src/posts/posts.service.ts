@@ -45,12 +45,15 @@ export class PostsService {
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.profile', 'author')
       .leftJoinAndSelect('author.user', 'user')
-      .leftJoin('post.likes', 'like')
+      .leftJoinAndSelect('post.likes', 'likes')          // needed for liked_by_me
+      .leftJoinAndSelect('likes.profile', 'likeProfile')
       .loadRelationCountAndMap('post.likes_count', 'post.likes')
       .loadRelationCountAndMap('post.comments_count', 'post.comments')
       .groupBy('post.id')
       .addGroupBy('author.id')
-      .addGroupBy('user.id');
+      .addGroupBy('user.id')
+      .addGroupBy('likes.id')
+      .addGroupBy('likeProfile.id');
 
     if (minLikes > 0) {
       db.having('COUNT(like.id)>:minLikes', { minLikes })
@@ -62,7 +65,6 @@ export class PostsService {
       filterableColumns:{
         deleted_at:[FilterOperator.EQ]
       },
-      defaultLimit: 2
     })
   }
 
