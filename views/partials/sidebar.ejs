@@ -1,0 +1,10 @@
+<aside class="sidebar">
+  <% if (typeof navLinks !== 'undefined') { %>
+    <% navLinks.forEach(function(link) { %>
+      <a href="<%= link.href %>"
+         class="sidebar-link<%= link.active ? ' active' : '' %>">
+        <%= link.label %>
+      </a>
+    <% }) %>
+  <% } %>
+</aside>

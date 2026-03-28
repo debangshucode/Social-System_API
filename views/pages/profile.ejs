@@ -1,0 +1,27 @@
+<div class="profile-page">
+  <div class="profile-header">
+    <% if (profile.avatar_url) { %>
+      <img src="<%= profile.avatar_url %>"
+           alt="<%= profile.user_name %>"
+           class="avatar-xl" />
+    <% } else { %>
+      <div class="avatar-xl avatar-placeholder">
+        <%= profile.user_name.charAt(0).toUpperCase() %>
+      </div>
+    <% } %>
+    <div class="profile-info">
+      <h1><%= profile.user_name %></h1>
+      <% if (profile.bio) { %>
+        <p class="profile-bio"><%= profile.bio %></p>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="profile-actions">
+    <a href="/api/avatar/sign"
+       class="btn btn-outline btn-sm"
+       target="_blank">
+      Update avatar via API
+    </a>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+<nav class="navbar">
+  <a class="navbar-brand" href="/">App</a>
+  <div class="navbar-right">
+    <% if (typeof user !== 'undefined' && user) { %>
+      <span class="navbar-user">
+        <%= user.first_name ?? user.email %>
+      </span>
+      <a href="/profile" class="navbar-link">Profile</a>
+      <form method="POST" action="/logout" class="inline-form">
+        <button type="submit" class="btn-text">Logout</button>
+      </form>
+    <% } else { %>
+      <a href="/login"  class="navbar-link">Login</a>
+      <a href="/signup" class="btn btn-primary btn-sm">Sign up</a>
+    <% } %>
+  </div>
+</nav>

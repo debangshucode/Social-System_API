@@ -10,5 +10,6 @@ import { PostsModule } from 'src/posts/posts.module';
   imports: [TypeOrmModule.forFeature([Like]),ProfilesModule,PostsModule],
   controllers: [LikesController],
   providers: [LikesService],
+  exports: [LikesService]
 })
 export class LikesModule {}

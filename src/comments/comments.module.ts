@@ -10,5 +10,6 @@ import { ProfilesModule } from 'src/profiles/profiles.module';
   imports:[TypeOrmModule.forFeature([Comment]),PostsModule,ProfilesModule],
   controllers: [CommentsController],
   providers: [CommentsService],
+  exports:[CommentsService]
 })
 export class CommentsModule {}

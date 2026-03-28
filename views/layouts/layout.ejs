@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head') %>
+  <%- style %>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <div class="app-shell">
+    <%- include('../partials/sidebar') %>
+    <main class="page-content">
+      <%- body %>
+    </main>
+  </div>
+  <%- include('../partials/footer') %>
+  <%- script %>
+</body>
+</html>

@@ -9,6 +9,7 @@ import { webAuthGuard } from "./guards/web-auth.guard";
 import { Paginate } from "nestjs-paginate";
 import type { PaginateQuery } from 'nestjs-paginate'
 import { CreateCommentDto } from "src/comments/dto/create-comment.dto";
+import { CreatePostDto } from "src/posts/dto/create-post.dto";
 
 
 @Controller()
@@ -24,7 +25,7 @@ export class WebController {
 
     // * ----Home Page
 
-    @Get()
+    @Get('/')
     home(@Req() req: Request, @Res() res: Response) {
         const user = (req as any).user ?? null;
         res.render('pages/home', this.contextService.build('/', user, { title: 'Home' }));
@@ -42,7 +43,6 @@ export class WebController {
         const user = (req as any).user;
 
         const result = await this.postsService.findAll(query);
-
         res.render('pages/feed', this.contextService.build('/feed', user, {
             posts: result.data,
             meta: result.meta,
@@ -62,17 +62,44 @@ export class WebController {
     ) {
         const user = (req as any).user;
 
-        const posts = await this.postsService.findOne(id);
+        const post = await this.postsService.findOne(id);
+        const profile = await this.profileService.findByUserId(user.sub);
+        if (!profile) throw new NotFoundException('Profile not found');
+
+        const postForView = {
+            ...post,
+            liked_by_me: (post.likes ?? []).some((like) => like.profile?.id === profile.id),
+        };
 
         const comments = await this.commentsService.findAll(query, id)
 
         res.render('pages/post', this.contextService.build('/feed', user, {
-            title: posts.content.slice(0, 10) ?? 'Post',
-            posts,
+            title: postForView.content.slice(0, 10) ?? 'Post',
+            post: postForView,
             comments: comments.data,
             commentsMeta: comments.meta,
             commentsLink: comments.links,
         }))
+    }
+
+
+    // * ---- Create Post
+    @Post('/posts')
+    @UseGuards(webAuthGuard)
+    async createPost(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Body() body: CreatePostDto
+    ) {
+        const user = (req as any).user;
+        const profile = await this.profileService.findByUserId(user.sub);
+        if (!profile) throw new NotFoundException('profile not found');
+
+        try {
+            await this.postsService.create(profile.id, body);
+        }
+        catch{}
+        res.redirect('/feed')
     }
 
 
@@ -85,7 +112,7 @@ export class WebController {
         @Res() res: Response
     ) {
         const user = (req as any).user;
-        const profile = await this.profileService.findByUserId(user.sub);
+        const profile = await this.profileService.findOne(user.sub);
 
         res.render('pages/profile', this.contextService.build('/profile', user, {
             title: profile?.user_name,
@@ -109,8 +136,8 @@ export class WebController {
             await this.likesService.create(profile.id, id)
         }
         catch { }
-            res.redirect(`posts/${id}`);
-        
+        res.redirect(`/posts/${id}`);
+
     }
 
 
@@ -131,7 +158,7 @@ export class WebController {
             await this.likesService.remove(profile.id, id);
         }
         catch { }
-            res.redirect(`posts/${id}`);
+        res.redirect(`/posts/${id}`);
     }
 
 
@@ -142,15 +169,15 @@ export class WebController {
     async addComment(
         @Req() req: Request,
         @Res() res: Response,
-        @Param('id',ParseIntPipe) id: number,
+        @Param('id', ParseIntPipe) id: number,
         @Body() body: CreateCommentDto,
     ) {
         const user = (req as any).user;
-         const profile = await this.profileService.findByUserId(user.sub);
+        const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) throw new NotFoundException('Profile not found');
         try {
             await this.commentsService.create(profile.id, id, { content: body.content });
-        } catch {}
+        } catch { }
         res.redirect(`/posts/${id}`);
     }
 

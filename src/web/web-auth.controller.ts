@@ -1,19 +1,21 @@
-// src/web/web-auth.controller.ts
-import { Controller, Get, Post, Body, Req, Res } from '@nestjs/common';
+﻿import { Controller, Get, Post, Body, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { AuthService }        from '../auth/auth.service';
-import { webContextService }  from './web-context.service';
+import { AuthService } from '../auth/auth.service';
+import { webContextService } from './web-context.service';
 import { LoginDto } from 'src/auth/dto/login.dto';
 import { RegisterDto } from 'src/auth/dto/register.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Controller()
 export class WebAuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly contextService:  webContextService,
+    private readonly contextService: webContextService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
-  // ── Login page ────────────────────────────────────────────────────────
   @Get('/login')
   loginPage(@Res() res: Response) {
     res.render('pages/login', {
@@ -22,33 +24,23 @@ export class WebAuthController {
     });
   }
 
-  // ── Login submit ──────────────────────────────────────────────────────
   @Post('/login')
-  async loginSubmit(
-    @Body() body: LoginDto,
-    @Res()  res:  Response,
-  ) {
+  async loginSubmit(@Body() body: LoginDto, @Res() res: Response) {
     try {
-      // auth.login returns { accessToken, user } + sets refresh cookie via response
-      // We need access to the response to forward the refresh cookie from AuthService.
-      // AuthService sets refresh cookie itself (via @Res() or Response injection).
-      // Here we call the service method that returns tokens only — the refresh cookie
-      // is handled inside AuthController.login via @Res().
-      // So: call service directly, set our own access_token cookie.
       const result = await this.authService.login(body);
       res.cookie('access_token', result.tokens.accessToken, {
         httpOnly: true,
         sameSite: 'strict',
-        maxAge:   15 * 60 * 1000,  
+        path: '/',
+        maxAge: 15 * 60 * 1000,
       });
 
-      // Also set the refresh token cookie matching existing path: /auth
       if (result.tokens.refreshToken) {
         res.cookie('refresh_token', result.tokens.refreshToken, {
           httpOnly: true,
           sameSite: 'strict',
-          path:     '/auth',
-          maxAge:   7 * 24 * 60 * 60 * 1000,
+          path: '/',
+          maxAge: 7 * 24 * 60 * 60 * 1000,
         });
       }
 
@@ -57,12 +49,11 @@ export class WebAuthController {
       res.render('pages/login', {
         ...this.contextService.build('/login', null, { title: 'Login' }),
         layout: 'layouts/auth',
-        error:  'Invalid email or password.',
+        error: 'Invalid email or password.',
       });
     }
   }
 
-  // ── Signup page ───────────────────────────────────────────────────────
   @Get('/signup')
   signupPage(@Res() res: Response) {
     res.render('pages/signup', {
@@ -71,27 +62,24 @@ export class WebAuthController {
     });
   }
 
-  // ── Signup submit ─────────────────────────────────────────────────────
   @Post('/signup')
-  async signupSubmit(
-    @Body() body: RegisterDto,
-    @Res() res: Response,
-  ) {
+  async signupSubmit(@Body() body: RegisterDto, @Res() res: Response) {
     try {
       const result = await this.authService.register(body);
 
       res.cookie('access_token', result.tokens.accessToken, {
         httpOnly: true,
         sameSite: 'strict',
-        maxAge:   15 * 60 * 1000,
+        path: '/',
+        maxAge: 15 * 60 * 1000,
       });
 
       if (result.tokens.refreshToken) {
         res.cookie('refresh_token', result.tokens.refreshToken, {
           httpOnly: true,
           sameSite: 'strict',
-          path:     '/auth',
-          maxAge:   7 * 24 * 60 * 60 * 1000,
+          path: '/',
+          maxAge: 7 * 24 * 60 * 60 * 1000,
         });
       }
 
@@ -100,21 +88,51 @@ export class WebAuthController {
       res.render('pages/signup', {
         ...this.contextService.build('/signup', null, { title: 'Create account' }),
         layout: 'layouts/auth',
-        error:  e?.message ?? 'Registration failed.',
+        error: e?.message ?? 'Registration failed.',
       });
     }
   }
 
-  // ── Logout ────────────────────────────────────────────────────────────
   @Post('/logout')
   async logout(@Req() req: Request, @Res() res: Response) {
-    const user = (req as any).user;
-    try {
-      if (user?.sub) await this.authService.logout(user.sub);
-    } catch { /* already logged out */ }
+    const userId = this.extractUserId(req);
 
-    res.clearCookie('access_token');
-    res.clearCookie('refresh_token', { path: '/auth' });  // exact path from handoff
+    try {
+      if (userId) await this.authService.logout(userId);
+    } catch {}
+
+    res.clearCookie('access_token', { path: '/' });
+    res.clearCookie('access_token', { path: '/posts' });
+    res.clearCookie('refresh_token', { path: '/' });
     res.redirect('/login');
   }
+
+  private extractUserId(req: Request): number | null {
+    const access = req.cookies?.access_token as string | undefined;
+    const refresh = req.cookies?.refresh_token as string | undefined;
+
+    if (access) {
+      try {
+        const payload = this.jwtService.verify(access, {
+          secret: this.configService.get<string>('jwt.accessSecret'),
+          ignoreExpiration: true,
+        }) as { sub?: number };
+
+        if (payload?.sub) return payload.sub;
+      } catch {}
+    }
+
+    if (refresh) {
+      try {
+        const payload = this.jwtService.verify(refresh, {
+          secret: this.configService.get<string>('jwt.refreshSecret'),
+        }) as { sub?: number };
+
+        if (payload?.sub) return payload.sub;
+      } catch {}
+    }
+
+    return null;
+  }
 }
+

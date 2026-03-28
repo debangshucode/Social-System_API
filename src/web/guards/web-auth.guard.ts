@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+﻿import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { Observable } from "rxjs";
@@ -33,7 +33,8 @@ export class webAuthGuard implements CanActivate{
             return true;
         }
         catch{
-            res.clearCookie('access_token');
+            res.clearCookie('access_token', { path: '/' });
+            res.clearCookie('access_token', { path: '/posts' });
             res.redirect('/login');
             return false;
         }

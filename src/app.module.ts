@@ -1,4 +1,4 @@
-import { Module, ValidationPipe } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, ValidationPipe } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -14,22 +14,26 @@ import { AvatarModule } from './avatar/avatar.module';
 import jwtConfig from './config/jwt.config';
 import Joi from 'joi';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { WebModule } from './web/web.module';
+import { RefreshTokenMiddleware } from './web/middlewares/refresh-token.middleware';
+
+
 
 @Module({
   imports: [
     ThrottlerModule.forRoot({
-      throttlers:[
+      throttlers: [
         {
-          ttl:1000,
-          limit:10
+          ttl: 1000,
+          limit: 10
         }
       ]
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      
+
       load: [jwtConfig],
-      
+
       validationSchema: Joi.object({
         CLOUDINARY_CLOUD_NAME: Joi.string().required(),
         CLOUDINARY_API_KEY: Joi.string().required(),
@@ -62,7 +66,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
       }),
     }),
 
-    UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule, AvatarModule],
+    WebModule, UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule, AvatarModule],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_PIPE,
@@ -72,9 +76,18 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
       transform: true,
     })
   },
-{
-  provide:APP_GUARD,
-  useClass:ThrottlerGuard
-}],
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
+    }],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RefreshTokenMiddleware)
+      .forRoutes('/', '/feed', '/profile', '/posts/:id',
+        '/posts/:id/like', '/posts/:id/unlike',
+        '/posts/:id/comment', '/logout')
+  }
+
+}

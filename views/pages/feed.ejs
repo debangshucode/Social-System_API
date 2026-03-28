@@ -1,0 +1,60 @@
+<div class="feed-header">
+  <h1>Feed</h1>
+</div>
+
+<% if (!posts || posts.length === 0) { %>
+  <p class="empty">No posts yet. Be the first!</p>
+<% } else { %>
+  <div class="post-list">
+    <% posts.forEach(function(post) { %>
+      <article class="post-card">
+        <div class="post-card-meta">
+          <% if (post.profile&& post.profile.avatar_url) { %>
+            <img src="<%= post.profile.avatar_url %>"
+                 alt="<%= post.profile.user_name %>"
+                 class="avatar-sm" />
+          <% } else { %>
+            <div class="avatar-sm avatar-placeholder">
+              <%= (post.profile?.user_name ?? 'U').charAt(0).toUpperCase() %>
+            </div>
+          <% } %>
+          <span class="post-author"><%= post.profile?.user_name ?? 'Unknown' %></span>
+          <time class="post-time">
+            <%= new Date(post.created_at).toLocaleDateString() %>
+          </time>
+        </div>
+
+        <p class="post-excerpt">
+          <%= post.content ? post.content.slice(0, 200) : '' %>
+          <% if (post.content && post.content.length > 200) { %>...
+          <% } %>
+        </p>
+
+        <div class="post-card-footer">
+          <span class="post-stat"><%= post.likes_count ?? 0 %> likes</span>
+          <span class="post-stat"><%= post.comments_count ?? 0 %> comments</span>
+          <a href="/posts/<%= post.id %>" class="btn btn-sm btn-outline">
+            Read more
+          </a>
+        </div>
+      </article>
+    <% }) %>
+  </div>
+
+  <!-- Pagination -->
+  <% if (meta && meta.totalPages > 1) { %>
+    <div class="pagination">
+      <% if (meta.currentPage > 1) { %>
+        <a href="/feed?page=<%= meta.currentPage - 1 %>"
+           class="btn btn-sm btn-outline">&larr; Prev</a>
+      <% } %>
+      <span class="page-info">
+        Page <%= meta.currentPage %> of <%= meta.totalPages %>
+      </span>
+      <% if (meta.currentPage < meta.totalPages) { %>
+        <a href="/feed?page=<%= meta.currentPage + 1 %>"
+           class="btn btn-sm btn-outline">Next &rarr;</a>
+      <% } %>
+    </div>
+  <% } %>
+<% } %>

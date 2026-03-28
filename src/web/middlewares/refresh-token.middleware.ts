@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware } from "@nestjs/common";
+﻿import { Injectable, NestMiddleware } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { AuthService } from "src/auth/auth.service";
@@ -30,9 +30,10 @@ export class RefreshTokenMiddleware implements NestMiddleware {
 
                 const { accessToken } = await this.auth.refresh(payload.sub, payload.email, payload.role)
 
-                res.cookie('access_token',accessToken, {
+                res.cookie('access_token', accessToken, {
                     httpOnly: true,
                     sameSite: 'strict',
+                    path: '/',
                     maxAge: 15 * 60 * 1000,
                 })
 

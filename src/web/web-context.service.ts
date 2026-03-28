@@ -1,21 +1,21 @@
 import { Injectable } from "@nestjs/common";
 export interface NavLink {
-    herf:string;
+    href:string;
     label:string;
     active:boolean;
 }
 
 const NAV:Omit<NavLink,'active'>[] = [
     {
-        herf:'/',
+        href:'/',
         label:'home'
     },
     {
-        herf:'/feed',
+        href:'/feed',
         label:'Feed'
     },
     {
-        herf:'/profile',
+        href:'/profile',
         label:'Profile'
     },
 ] 
@@ -29,7 +29,7 @@ export class webContextService {
     ):Record<string,unknown> {
         return{
             user,
-            navLinks:NAV.map(x=>({...x,active:x.herf === currentPath})),
+            navLinks:NAV.map(x=>({...x,active:x.href === currentPath})),
             error:null,
             title:'App',
             ...extra,
