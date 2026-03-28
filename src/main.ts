@@ -3,13 +3,40 @@ import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { VersioningType } from '@nestjs/common';
+import * as expressLayouts from 'express-ejs-layouts'
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
+
+
+
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(cookieParser());
   app.enableCors();
 
-  
+  //*1  ejs layout set-up
+  app.setBaseViewsDir(join(__dirname, '..', 'views'));
+  app.setViewEngine('ejs');
+  app.use(expressLayouts);
+  app.set('layout', 'layouts/layout');
+  app.set('layout extractStyles', true);
+  app.set('layout extractScripts', true);
+  //*1 
+
+  // *2 use static assets 
+  app.useStaticAssets(join(__dirname, '..', 'public'));
+  // *2
+
+  // *3 Global API prefix — SSR routes excluded
+  app.setGlobalPrefix('api', {
+    exclude: ['/', '/login', '/signup', '/feed', '/profile', '/logout',
+      'posts/:id', 'posts/:id/like', 'posts/:id/unlike',
+      'posts/:id/comment'],
+  });
+  // *3
+
+
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Social System API')
     .setDescription('API documentation for the Social System project')
