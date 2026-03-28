@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { VersioningType } from '@nestjs/common';
-import * as expressLayouts from 'express-ejs-layouts'
+import expressLayouts from 'express-ejs-layouts'
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
