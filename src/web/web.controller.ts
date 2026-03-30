@@ -10,6 +10,11 @@ import { Paginate } from "nestjs-paginate";
 import type { PaginateQuery } from 'nestjs-paginate'
 import { CreateCommentDto } from "src/comments/dto/create-comment.dto";
 import { CreatePostDto } from "src/posts/dto/create-post.dto";
+import { Profile } from "src/profiles/entities/profile.entity";
+import { CreateProfileDto } from "src/profiles/dto/create-profile.dto";
+import { UpdateAvatarDto } from "src/avatar/dto/update-avatar.dto";
+import { AvatarService } from "src/avatar/avatar.service";
+import { error } from "console";
 
 
 @Controller()
@@ -20,7 +25,8 @@ export class WebController {
         private readonly postsService: PostsService,
         private readonly profileService: ProfilesService,
         private readonly likesService: LikesService,
-        private readonly commentsService: CommentsService
+        private readonly commentsService: CommentsService,
+        private readonly avatarService: AvatarService
     ) { }
 
     // * ----Home Page
@@ -84,7 +90,7 @@ export class WebController {
 
 
     // * ---- Create Post
-    @Post('/posts')
+    @Post('/feed/post')
     @UseGuards(webAuthGuard)
     async createPost(
         @Req() req: Request,
@@ -98,7 +104,7 @@ export class WebController {
         try {
             await this.postsService.create(profile.id, body);
         }
-        catch{}
+        catch { }
         res.redirect('/feed')
     }
 
@@ -112,14 +118,73 @@ export class WebController {
         @Res() res: Response
     ) {
         const user = (req as any).user;
-        const profile = await this.profileService.findOne(user.sub);
+        let profile: Profile | null = null
+        let hasProfile = true;
+        try {
+            profile = await this.profileService.findOne(user.sub);
+        }
+        catch {
+            hasProfile = false;
+        }
 
         res.render('pages/profile', this.contextService.build('/profile', user, {
-            title: profile?.user_name,
-            profile
+            title: hasProfile ? profile?.user_name : 'My profile',
+            profile,
+            hasProfile
         }));
     }
 
+    // * Create profile
+    @Post('/profile/create')
+    @UseGuards(webAuthGuard)
+    async createProfile(@Req() req: Request, @Body() body: CreateProfileDto, @Res() res: Response) {
+        const user = (req as any).user;
+        let profile: Profile | null = null
+        let hasProfile = true;
+        try {
+            profile = await this.profileService.create(user.sub, body)
+            res.render('pages/profile', this.contextService.build('/profile', user, {
+                title: profile?.user_name ?? 'My profile',
+                profile,
+                hasProfile
+            }));
+        }
+        catch (err) {
+            throw err;
+        }
+
+    }
+
+    // * ----update avatar
+
+    @Post('/profile/avatar')
+    @UseGuards(webAuthGuard)
+    async updateAvatar(@Req() req: Request, @Res() res: Response, @Body() body: UpdateAvatarDto) {
+        const user = (req as any).user;
+        try {
+            await this.avatarService.updateAvatar(user.sub, body.public_id);
+            res.redirect('/profile')
+        }
+        catch (err) {
+            res.redirect('/profile')
+            throw err;
+        }
+    }
+
+    // * remove avatar
+    @Post('/profile/avatar/remove')
+    @UseGuards(webAuthGuard)
+    async deleteAvatar(@Req() req: Request, @Res() res: Response) {
+        const user = (req as any).user;
+        try {
+            await this.avatarService.deleteAvatar(user.sub);
+            res.redirect('/profile')
+        }
+        catch (err) {
+            res.redirect('/profile')
+            throw err;
+        }
+    }
 
     // * ----Like 
     @Post('/posts/:id/like')

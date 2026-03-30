@@ -189,3 +189,50 @@ body {
 
 /* ── Empty state ── */
 .empty { color: #999; padding: 2rem 0; font-size: 0.9rem; }
+
+/* ── Alerts ── */
+.alert {
+  border-radius: 8px;
+  padding: .65rem 1rem;
+  margin-bottom: 1.1rem;
+  font-size: .875rem;
+  font-weight: 500;
+}
+.alert-success { background: #eaf3de; color: #27500a; border: 1px solid #c0dd97; }
+.alert-error   { background: #fcebeb; color: #791f1f; border: 1px solid #f7c1c1; }
+
+/* ── Feed header ── */
+.feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Profile create card ── */
+.profile-create-card {
+  background: #fff;
+  border: 1px dashed #ccc;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 480px;
+}
+.profile-create-card h2 { font-size: 1.1rem; margin-bottom: .4rem; }
+.profile-create-card p  { color: #666; font-size: .875rem; margin-bottom: 1.25rem; }
+
+/* ── Profile section block ── */
+.profile-section {
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eeecea;
+}
+
+/* ── Inline comment edit active border ── */
+.comment:has(form) {
+  border-color: #AFA9EC;
+}
+
+#post-content,#bio {
+  width: 100%;
+  padding: 2px;
+}

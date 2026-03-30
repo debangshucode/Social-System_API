@@ -86,8 +86,9 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(RefreshTokenMiddleware)
       .forRoutes('/', '/feed', '/profile', '/posts/:id',
+        '/feed/post',
         '/posts/:id/like', '/posts/:id/unlike',
-        '/posts/:id/comment', '/logout')
+        '/posts/:id/comment','/profile/create','/profile/avatar','/profile/avatar/remove', '/logout')
   }
 
 }

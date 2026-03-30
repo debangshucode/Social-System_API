@@ -30,8 +30,9 @@ async function bootstrap() {
 
   // *3 Global API prefix — SSR routes excluded
   app.setGlobalPrefix('api', {
-    exclude: ['/', '/login', '/signup', '/feed', '/profile', '/logout',
-      'posts/:id', 'posts/:id/like', 'posts/:id/unlike',
+    exclude: ['/', '/login', '/signup', '/feed', '/profile','/profile/create', '/logout',
+      '/feed/post',
+      'posts/:id', 'posts/:id/like','/profile/avatar/remove', 'posts/:id/unlike','/profile/avatar',
       'posts/:id/comment'],
   });
   // *3

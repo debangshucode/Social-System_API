@@ -10,6 +10,7 @@ import { WebAuthController } from "./web-auth.controller";
 import { webContextService } from "./web-context.service";
 import { webAuthGuard } from "./guards/web-auth.guard";
 import { RefreshTokenMiddleware } from "./middlewares/refresh-token.middleware";
+import { AvatarModule } from "src/avatar/avatar.module";
 
 
 
@@ -20,6 +21,7 @@ import { RefreshTokenMiddleware } from "./middlewares/refresh-token.middleware";
         ProfilesModule,
         CommentsModule,
         LikesModule,
+        AvatarModule,
         JwtModule
     ],
 

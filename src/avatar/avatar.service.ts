@@ -27,7 +27,7 @@ export class AvatarService {
             public_id: publicId,
             folder,
             api_key: this.config.get('CLOUDINARY_API_KEY'),
-            cloude_name: this.config.get('CLOUDINARY_CLOUD_NAME'),
+            cloud_name: this.config.get('CLOUDINARY_CLOUD_NAME'),
         }
     }
 

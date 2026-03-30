@@ -1,27 +1,140 @@
-<div class="profile-page">
-  <div class="profile-header">
-    <% if (profile.avatar_url) { %>
-      <img src="<%= profile.avatar_url %>"
-           alt="<%= profile.user_name %>"
-           class="avatar-xl" />
-    <% } else { %>
-      <div class="avatar-xl avatar-placeholder">
-        <%= profile.user_name.charAt(0).toUpperCase() %>
+
+<% if (!hasProfile) { %>
+
+  <div class="profile-create-card">
+    <h2>Set up your profile</h2>
+    <p>Choose a username to get started.</p>
+    <form method="POST" action="/profile/create">
+      <div class="form-group" style="text-align:left">
+        <label for="user_name">Username</label>
+        <input id="user_name" type="text" name="user_name"
+               required minlength="3" maxlength="30"
+               placeholder="e.g. johndoe" />
       </div>
-    <% } %>
-    <div class="profile-info">
-      <h1><%= profile.user_name %></h1>
-      <% if (profile.bio) { %>
-        <p class="profile-bio"><%= profile.bio %></p>
+      <div class="form-group" style="text-align:left">
+        <label for="bio">Bio <span style="color:#aaa;font-weight:400">(optional)</span></label>
+        <textarea id="bio" name="bio" rows="3"
+                  placeholder="Tell people a bit about yourself..."
+                  maxlength="300"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Create profile</button>
+    </form>
+  </div>
+
+<% } else { %>
+
+  <div class="profile-page">
+    <div class="profile-header">
+
+      <div style="flex-shrink:0">
+        <% if (profile.avatar_url) { %>
+          <img src="<%= profile.avatar_url %>" alt="<%= profile.user_name %>"
+               class="avatar-xl" id="current-avatar" />
+        <% } else { %>
+          <div class="avatar-xl avatar-placeholder" id="current-avatar">
+            <%= profile.user_name.charAt(0).toUpperCase() %>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="profile-info">
+        <h1><%= profile.user_name %></h1>
+        <% if (profile.bio) { %>
+          <p class="profile-bio"><%= profile.bio %></p>
+        <% } else { %>
+          <p class="profile-bio" style="color:#aaa;font-style:italic">No bio yet.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Avatar section -->
+    <div class="profile-section">
+      <h2 style="font-size:1rem;margin-bottom:1rem">Profile picture</h2>
+
+      <%# 
+        Avatar upload flow:
+        1. User picks a file in the <input type="file">
+        2. Page fetches GET /api/avatar/sign to get Cloudinary signature
+        3. Uploads directly to Cloudinary via fetch (this is Cloudinary's required client-side step —
+           server-side direct upload would require streaming the file through our server)
+        4. On success, puts the returned public_id into the hidden input
+        5. Submits the form to POST /profile/avatar (our SSR route)
+        6. Our controller calls ProfilesService.updateAvatar and redirects
+      %>
+
+      <form method="POST" action="/profile/avatar" id="avatar-form">
+        <input type="hidden" name="public_id" id="avatar-public-id" />
+
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+          <label class="btn btn-outline btn-sm" style="cursor:pointer">
+            Choose image
+            <input type="file" id="avatar-file-input"
+                   accept="image/jpeg,image/png,image/webp"
+                   style="display:none"
+                   onchange="handleAvatarFile(this)" />
+          </label>
+          <span id="avatar-file-name" style="font-size:.875rem;color:#666"></span>
+          <button type="submit" id="avatar-submit-btn"
+                  class="btn btn-primary btn-sm" disabled>
+            Save avatar
+          </button>
+        </div>
+        <p id="avatar-status" style="font-size:.825rem;margin-top:.5rem;color:#666"></p>
+      </form>
+
+      <% if (profile.avatar_url) { %>
+        <form method="POST" action="/profile/avatar/remove" style="margin-top:.6rem">
+          <button type="submit" class="btn btn-outline btn-sm"
+                  style="color:#a32d2d;border-color:#f09595"
+                  onclick="return confirm('Remove your avatar?')">
+            Remove avatar
+          </button>
+        </form>
       <% } %>
     </div>
   </div>
 
-  <div class="profile-actions">
-    <a href="/api/avatar/sign"
-       class="btn btn-outline btn-sm"
-       target="_blank">
-      Update avatar via API
-    </a>
-  </div>
-</div>
+  <script>
+  async function handleAvatarFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    document.getElementById('avatar-file-name').textContent = file.name;
+    document.getElementById('avatar-status').textContent = 'Uploading...';
+    document.getElementById('avatar-submit-btn').disabled = true;
+
+    try {
+      // Step 1: get Cloudinary signature from our API
+      const sigRes = await fetch('/api/avatar/sign', {
+        credentials: 'include',
+      });
+
+      if (!sigRes.ok) throw new Error('Could not get upload signature');
+      const sig = await sigRes.json();
+
+      // Step 2: upload directly to Cloudinary (required — they don't accept server-proxied streams)
+      const fd = new FormData();
+      fd.append('file',       file);
+      fd.append('api_key',    sig.api_key);
+      fd.append('timestamp',  sig.timeStamp);
+      fd.append('signature',  sig.signature);
+      fd.append('public_id',  sig.public_id);
+
+      const upRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`,
+        { method: 'POST', body: fd }
+      );
+      if (!upRes.ok) throw new Error('Cloudinary upload failed');
+      const up = await upRes.json();
+
+      // Step 3: put public_id into hidden field and enable submit
+      document.getElementById('avatar-public-id').value = up.public_id;
+      document.getElementById('avatar-submit-btn').disabled = false;
+      document.getElementById('avatar-status').textContent = 'Ready — click Save avatar';
+    } catch (e) {
+      document.getElementById('avatar-status').textContent = e.message;
+    }
+  }
+  </script>
+
+<% } %>

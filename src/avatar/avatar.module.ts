@@ -12,5 +12,6 @@ import { ProfilesModule } from 'src/profiles/profiles.module';
   imports:[UsersModule,TypeOrmModule.forFeature([Profile]),ProfilesModule],
   controllers: [AvatarController],
   providers: [CloudinaryProvider, AvatarService, ProfilesService],
+  exports:[AvatarService]
 })
 export class AvatarModule {}
