@@ -115,25 +115,42 @@ export class WebController {
 
     @Get('/profile')
     @UseGuards(webAuthGuard)
-    async profile(
+    async ownProfile(
         @Req() req: Request,
-        @Res() res: Response
+        @Res() res: Response,
+        @Paginate() query: PaginateQuery
     ) {
         const user = (req as any).user;
-        let profile: Profile | null = null
-        let hasProfile = true;
-        try {
-            profile = await this.profileService.findOne(user.sub);
-        }
-        catch {
-            hasProfile = false;
+
+        const curUserProfile = await this.profileService.findOne(user.sub);
+
+        if (!curUserProfile) {
+            return res.redirect('/create-profile');
         }
 
-        res.render('pages/profile', this.contextService.build('/profile', user, {
-            title: hasProfile ? profile?.user_name : 'My profile',
-            profile,
-            hasProfile
-        }));
+        const profileID = curUserProfile.id;
+
+        const posts = await this.postsService.findPostByUser(profileID, query);
+        const follower = await this.followService.findAll(query, profileID);
+        const following = await this.followService.findAllFollowing(query, profileID);
+
+        res.render(
+            'pages/profile',
+            this.contextService.build('/profile', user, {
+                title: curUserProfile.user_name,
+                profile: curUserProfile,
+                profileID,
+                data: posts.data,
+                meta: posts.meta,
+                fMeta: follower.meta,
+                fData: follower.data,
+                flMeta: following.meta,
+                flData: following.data,
+                curUserProfile,
+                hasProfile: true,
+                isOwnProfile: true
+            }),
+        );
     }
 
     // * Create profile
@@ -163,16 +180,26 @@ export class WebController {
     @UseGuards(webAuthGuard)
     async usersProfile(@Req() req: Request, @Res() res: Response, @Paginate() query: PaginateQuery, @Param('id', ParseIntPipe) profileID: number) {
         const user = (req as any).user;
-        const profile = await this.profileService.findByProfileId(profileID)
+        const profile = await this.profileService.findByProfileId(profileID);
+        const curUserProfile = await this.profileService.findByUserId(user.sub) as Profile;
         const posts = await this.postsService.findPostByUser(profileID, query);
-        const follower = await this.followService.findAll(query,profileID)
+        const follower = await this.followService.findAll(query, profileID);
+        const following = await this.followService.findAllFollowing(query, profileID);
+        const isFollowing = await this.followService.isFollowing(
+            curUserProfile.id,
+            profileID
+        );
         res.render('pages/userProfile', this.contextService.build('/profile', user, {
             title: profile?.user_name,
             profile,
             profileID,
             data: posts.data,
             meta: posts.meta,
-            fMeta:follower.meta
+            fMeta: follower.meta,
+            fData: follower.data,
+            flMeta: following.meta,
+            flData: following.data,
+            isFollowing
         }));
     }
 
@@ -301,5 +328,22 @@ export class WebController {
         catch { }
         res.redirect(`/profile/${id}`);
 
+    }
+    @Post('/profile/:id/unfollow')
+    @UseGuards(webAuthGuard)
+    async unfollow(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Param('id', ParseIntPipe) id: number
+    ) {
+
+        const user = (req as any).user;
+        const profile = await this.profileService.findByUserId(user.sub);
+        if (!profile) throw new NotFoundException('profile not found');
+        try {
+            await this.followService.remove(profile.id, id)
+        }
+        catch { }
+        res.redirect(`/profile/${id}`);
     }
 }

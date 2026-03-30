@@ -592,6 +592,7 @@ a {
   margin-top: 15px;
   font-size: large;
   width: fit-content;
+  text-align: center;
 }
 .profile-page {
   padding: 0 20px;
@@ -639,11 +640,11 @@ a {
   justify-content: space-around;
 }
 
-.count {
+.profile-top .count {
   font-size: 4rem;
   font-weight: 700;
 }
-.count-text {
+.profile-top .count-text {
   font-size: 2rem;
 }
 .img-info {
@@ -653,6 +654,10 @@ a {
   align-items: center;
 }
 
-.img-info .btn{
+.img-info .btn {
   font-size: large;
+}
+.btn-danger {
+  background-color: #c92934;
+  color: white;
 }

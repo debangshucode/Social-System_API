@@ -25,28 +25,45 @@
             <p><%= profile.bio %>   </p>
         </div>
 
-        <form method="POST" action="/profile/<%= profileID %>/follow">
-          <button type="submit" class="btn btn-primary btn-sm">
-            Follow 
-          </button>
-        </form>
+
+        <% if (isFollowing) { %>
+          <form method="POST" action="/profile/<%= profileID %>/unfollow">
+            <button type="submit" class="btn btn-danger btn-sm">
+              Unfollow
+            </button>
+          </form>
+        <% } else { %>
+          <form method="POST" action="/profile/<%= profileID %>/follow">
+              <button type="submit" class="btn btn-primary btn-sm">
+                Follow
+              </button>
+          </form>
+        <% } %>
 
        </div>
 
         <!-- ^ stats -->
          <div class="stats">
 
+             <!-- ^ Post counts -->
+             <div class="postC">
+                <p class="count"><%= meta.totalItems %></p>
+                <p class="count-text">Posts</p>
+             </div>
+
             <!-- ^ Followers  -->
              <div class="flwrs">
                 <p class="count"><%= fMeta.totalItems %></p>
                 <p class="count-text">Followers</p>
              </div>
-            
-            <!-- ^ Post counts -->
+
+              <!-- ^ Followings -->
              <div class="postC">
-                <p class="count"><%= meta.totalItems %></p>
-                <p class="count-text">Posts</p>
+                <p class="count"><%= flMeta.totalItems %></p>
+                <p class="count-text">Followings</p>
              </div>
+            
+           
          </div>
     </div>
 
@@ -96,20 +113,20 @@
     </div>
   
     <% if (meta && meta.totalPages > 1) { %>
-    <div class="pagination">
-      <% if (meta.currentPage > 1) { %>
-        <a href="/profile/<%= profileID%>?page=<%= meta.currentPage - 1 %>"
-           class="btn btn-sm btn-outline">&larr; Prev</a>
-      <% } %>
-      <span class="page-info">
-        Page <%= meta.currentPage %> of <%= meta.totalPages %>
-      </span>
-      <% if (meta.currentPage < meta.totalPages) { %>
-        <a href="/profile/<%= profileID%>?page=<%= meta.currentPage + 1 %>"
-           class="btn btn-sm btn-outline">Next &rarr;</a>
-      <% } %>
-    </div>
-  <% } %>
+      <div class="pagination">
+        <% if (meta.currentPage > 1) { %>
+          <a href="/profile/<%= profileID%>?page=<%= meta.currentPage - 1 %>"
+             class="btn btn-sm btn-outline">&larr; Prev</a>
+        <% } %>
+        <span class="page-info">
+          Page <%= meta.currentPage %> of <%= meta.totalPages %>
+        </span>
+        <% if (meta.currentPage < meta.totalPages) { %>
+          <a href="/profile/<%= profileID%>?page=<%= meta.currentPage + 1 %>"
+             class="btn btn-sm btn-outline">Next &rarr;</a>
+        <% } %>
+      </div>
+   <% } %>
 
 </div>
 

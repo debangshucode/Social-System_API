@@ -86,4 +86,11 @@ export class FollowService {
             defaultSortBy: [['created_at', 'DESC']]
         });
     }
+
+    async isFollowing(currentUserId: number, profileID: number) {
+        const following = await this.followRepo.findOne({ where: { follower_id: currentUserId, following_id: profileID } });
+        if(!following) return false
+
+        return true;
+    }
 }
