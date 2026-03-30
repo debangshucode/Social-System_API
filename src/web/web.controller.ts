@@ -309,8 +309,8 @@ export class WebController {
             profiles: profiles.data,
             meta: profiles.meta,
             userName,
-            data:allProfile.data,
-            allMeta:allProfile.meta
+            data: allProfile.data,
+            allMeta: allProfile.meta
         }));
     }
 
@@ -350,22 +350,26 @@ export class WebController {
         res.redirect(`/profile/${id}`);
     }
 
-    // @Get('/profile/:id/unfollow')
+    // @Get('/profile/:id/followers')
     // @UseGuards(webAuthGuard)
-    // async unfollow(
+    // async getAllFollowers(
     //     @Req() req: Request,
     //     @Res() res: Response,
-    //     @Param('id', ParseIntPipe) id: number
+    //     @Param('id', ParseIntPipe) profileID: number,
+    //     @Paginate() query:PaginateQuery
     // ) {
 
     //     const user = (req as any).user;
-    //     const profile = await this.profileService.findByUserId(user.sub);
-    //     if (!profile) throw new NotFoundException('profile not found');
-    //     try {
-    //         await this.followService.remove(profile.id, id)
-    //     }
-    //     catch { }
-    //     res.redirect(`/profile/${id}`);
+    //     const profile = await this.profileService.findByProfileId(profileID);
+    //     const curUserProfile = await this.profileService.findByUserId(user.sub) as Profile;
+    //     const follower = await this.followService.findAll(query, profileID);
+    //     const following = await this.followService.findAllFollowing(query, profileID);
+    //     const isFollowing = await this.followService.isFollowing(
+    //         curUserProfile.id,
+    //         profileID
+    //     );
+
+
     // }
 
 }

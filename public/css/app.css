@@ -663,3 +663,69 @@ a {
   color: white;
 }
 
+.stat-btn {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  text-align: center;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+}
+
+.modal-card {
+  width: min(520px, 92vw);
+  max-height: 80vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e4df;
+}
+
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .9rem 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-close {
+  border: 0;
+  background: transparent;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: .75rem 1rem 1rem;
+}
+
+.modal-list {
+  display: grid;
+  gap: .5rem;
+}
+
+.modal-user-row {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.modal-user-row:hover {
+  background: #f7f7f7;
+}
+.modal-backdrop[hidden] {
+  display: none !important;
+}

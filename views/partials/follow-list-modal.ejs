@@ -1,0 +1,33 @@
+<div id="<%= modalId %>" class="modal-backdrop" hidden>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3><%= title %></h3>
+      <button type="button" class="modal-close" data-close-modal>&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <% if (!items || items.length === 0) { %>
+        <p class="empty">No users found.</p>
+      <% } else { %>
+        <div class="modal-list">
+          <% items.forEach(function(row) { 
+               const u = row[userKey];
+          %>
+            <% if (u) { %>
+              <a href="/profile/<%= u.id %>" class="modal-user-row">
+                <% if (u.avatar_url) { %>
+                  <img src="<%= u.avatar_url %>" class="avatar-sm" alt="<%= u.user_name %>" />
+                <% } else { %>
+                  <div class="avatar-sm avatar-placeholder">
+                    <%= (u.user_name || 'U').charAt(0).toUpperCase() %>
+                  </div>
+                <% } %>
+                <span><%= u.user_name %></span>
+              </a>
+            <% } %>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
