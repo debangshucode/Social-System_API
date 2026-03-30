@@ -25,9 +25,11 @@
             <p><%= profile.bio %>   </p>
         </div>
 
-        <button class="btn btn-primary btn-sm">
-            Follow
-        </button>
+        <form method="POST" action="/profile/<%= profileID %>/follow">
+          <button type="submit" class="btn btn-primary btn-sm">
+            Follow 
+          </button>
+        </form>
 
        </div>
 
@@ -36,7 +38,7 @@
 
             <!-- ^ Followers  -->
              <div class="flwrs">
-                <p class="count"><%= meta.totalItems %></p>
+                <p class="count"><%= fMeta.totalItems %></p>
                 <p class="count-text">Followers</p>
              </div>
             

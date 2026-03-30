@@ -3,6 +3,7 @@ import { User } from "../../users/entities/user.entity";
 import { Post } from "../../posts/entities/post.entity";
 import { Comment } from "../../comments/entities/comment.entity";
 import { Like } from "../../likes/entities/like.entity";
+import { Follow } from "src/follow/entities/follow.entity";
 @Entity('profiles')
 export class Profile {
 
@@ -27,25 +28,31 @@ export class Profile {
     cloudinary_public_id: string | null;
 
     @CreateDateColumn()
-    created_at: Date
+    created_at: Date;
 
     @UpdateDateColumn()
-    updated_at: Date
+    updated_at: Date;
 
     @DeleteDateColumn()
-    deleted_at: Date
+    deleted_at: Date;
 
     @OneToOne(() => User, (user) => user.profile)
     @JoinColumn({ name: 'user_id' })
-    user: User
+    user: User;
 
     @OneToMany(() => Post, (post) => post.profile)
-    posts: Post[]
+    posts: Post[];
 
     @OneToMany(() => Comment, (comments) => comments.profile)
-    comments: Comment[]
+    comments: Comment[];
 
     @OneToMany(() => Like, (likes) => likes.profile)
-    likes: Like[]
+    likes: Like[];
+
+    @OneToMany(()=> Follow,(follow)=> follow.follower)
+    followings: Follow[];
+
+    @OneToMany(()=> Follow,(follow)=>follow.following)
+    followers: Follow[];
 
 }

@@ -15,6 +15,7 @@ import { CreateProfileDto } from "src/profiles/dto/create-profile.dto";
 import { UpdateAvatarDto } from "src/avatar/dto/update-avatar.dto";
 import { AvatarService } from "src/avatar/avatar.service";
 import { error } from "console";
+import { FollowService } from "src/follow/follow.service";
 
 
 @Controller()
@@ -26,7 +27,8 @@ export class WebController {
         private readonly profileService: ProfilesService,
         private readonly likesService: LikesService,
         private readonly commentsService: CommentsService,
-        private readonly avatarService: AvatarService
+        private readonly avatarService: AvatarService,
+        private readonly followService: FollowService
     ) { }
 
     // * ----Home Page
@@ -163,13 +165,14 @@ export class WebController {
         const user = (req as any).user;
         const profile = await this.profileService.findByProfileId(profileID)
         const posts = await this.postsService.findPostByUser(profileID, query);
-
+        const follower = await this.followService.findAll(query,profileID)
         res.render('pages/userProfile', this.contextService.build('/profile', user, {
             title: profile?.user_name,
             profile,
             profileID,
-            data:posts.data,
-            meta:posts.meta
+            data: posts.data,
+            meta: posts.meta,
+            fMeta:follower.meta
         }));
     }
 
@@ -281,4 +284,22 @@ export class WebController {
         }));
     }
 
+    // * ---- Follow
+    @Post('/profile/:id/follow')
+    @UseGuards(webAuthGuard)
+    async follow(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        const user = (req as any).user;
+        const profile = await this.profileService.findByUserId(user.sub);
+        if (!profile) throw new NotFoundException('profile not found');
+        try {
+            await this.followService.create(profile.id, id)
+        }
+        catch { }
+        res.redirect(`/profile/${id}`);
+
+    }
 }

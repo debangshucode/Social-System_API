@@ -16,6 +16,7 @@ import Joi from 'joi';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { WebModule } from './web/web.module';
 import { RefreshTokenMiddleware } from './web/middlewares/refresh-token.middleware';
+import { FollowModule } from './follow/follow.module';
 
 
 
@@ -66,7 +67,7 @@ import { RefreshTokenMiddleware } from './web/middlewares/refresh-token.middlewa
       }),
     }),
 
-    WebModule, UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule, AvatarModule],
+    WebModule, UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule, AvatarModule, FollowModule],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_PIPE,
@@ -85,7 +86,7 @@ export class AppModule implements NestModule {
 
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(RefreshTokenMiddleware)
-      .forRoutes('/', '/feed', '/profile', '/posts/:id','profile/:id',
+      .forRoutes('/', '/feed', '/profile', '/posts/:id','profile/:id','/profile/:id/follow',
         '/feed/post',
         '/posts/:id/like', '/posts/:id/unlike',
         '/posts/:id/comment','/profile/create','/profile/avatar','/profile/avatar/remove','/search', '/logout')

@@ -11,6 +11,7 @@ import { webContextService } from "./web-context.service";
 import { webAuthGuard } from "./guards/web-auth.guard";
 import { RefreshTokenMiddleware } from "./middlewares/refresh-token.middleware";
 import { AvatarModule } from "src/avatar/avatar.module";
+import { FollowModule } from "src/follow/follow.module";
 
 
 
@@ -22,6 +23,7 @@ import { AvatarModule } from "src/avatar/avatar.module";
         CommentsModule,
         LikesModule,
         AvatarModule,
+        FollowModule,
         JwtModule
     ],
 
