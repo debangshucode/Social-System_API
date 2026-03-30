@@ -51,17 +51,6 @@
     <div class="profile-section">
       <h2 style="font-size:1rem;margin-bottom:1rem">Profile picture</h2>
 
-      <%# 
-        Avatar upload flow:
-        1. User picks a file in the <input type="file">
-        2. Page fetches GET /api/avatar/sign to get Cloudinary signature
-        3. Uploads directly to Cloudinary via fetch (this is Cloudinary's required client-side step —
-           server-side direct upload would require streaming the file through our server)
-        4. On success, puts the returned public_id into the hidden input
-        5. Submits the form to POST /profile/avatar (our SSR route)
-        6. Our controller calls ProfilesService.updateAvatar and redirects
-      %>
-
       <form method="POST" action="/profile/avatar" id="avatar-form">
         <input type="hidden" name="public_id" id="avatar-public-id" />
 
@@ -104,7 +93,6 @@
     document.getElementById('avatar-submit-btn').disabled = true;
 
     try {
-      // Step 1: get Cloudinary signature from our API
       const sigRes = await fetch('/api/avatar/sign', {
         credentials: 'include',
       });
@@ -112,7 +100,6 @@
       if (!sigRes.ok) throw new Error('Could not get upload signature');
       const sig = await sigRes.json();
 
-      // Step 2: upload directly to Cloudinary (required — they don't accept server-proxied streams)
       const fd = new FormData();
       fd.append('file',       file);
       fd.append('api_key',    sig.api_key);
@@ -127,7 +114,6 @@
       if (!upRes.ok) throw new Error('Cloudinary upload failed');
       const up = await upRes.json();
 
-      // Step 3: put public_id into hidden field and enable submit
       document.getElementById('avatar-public-id').value = up.public_id;
       document.getElementById('avatar-submit-btn').disabled = false;
       document.getElementById('avatar-status').textContent = 'Ready — click Save avatar';
