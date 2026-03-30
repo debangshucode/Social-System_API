@@ -91,14 +91,14 @@
   <% if (commentsMeta && commentsMeta.totalPages > 1) { %>
     <div class="pagination">
       <% if (commentsMeta.currentPage > 1) { %>
-        <a href="/posts/<%= post.id %>?commentPage=<%= commentsMeta.currentPage - 1 %>"
+        <a href="/posts/<%= post.id %>?page=<%= commentsMeta.currentPage - 1 %>"
            class="btn btn-sm btn-outline">&larr; Prev</a>
       <% } %>
       <span class="page-info">
         Page <%= commentsMeta.currentPage %> of <%= commentsMeta.totalPages %>
       </span>
       <% if (commentsMeta.currentPage < commentsMeta.totalPages) { %>
-        <a href="/posts/<%= post.id %>?commentPage=<%= commentsMeta.currentPage + 1 %>"
+        <a href="/posts/<%= post.id %>?page=<%= commentsMeta.currentPage + 1 %>"
            class="btn btn-sm btn-outline">Next &rarr;</a>
       <% } %>
     </div>

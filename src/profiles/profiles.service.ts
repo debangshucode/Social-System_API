@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Profile } from './entities/profile.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
@@ -80,9 +80,24 @@ export class ProfilesService {
     const profile = await this.profileRepo.findOne({
       where: { user: { id } },
       select: ['id', 'cloudinary_public_id'],
-      relations:{user:true}
+      relations: { user: true }
     });
     return profile;
+  }
+
+
+  async findByUserName(userName: string, query: PaginateQuery) {
+    return paginate(query, this.profileRepo, {
+      where: { user_name: Like(`%${userName}%`) },
+      relations: ['user'],
+      sortableColumns: ['id', 'created_at'],
+      defaultSortBy: [['id', 'DESC']],
+      defaultLimit:1
+    });
+  }
+
+  async findByProfileId(id:number){
+    return this.profileRepo.findOne({where:{id}});
   }
 
   async updateAvatar(

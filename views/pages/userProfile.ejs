@@ -1,0 +1,113 @@
+<div class="profile-page">
+
+
+    <div class="profile-top">
+        <!-- ~ Image and info -->
+       <div class="img-info">
+             <!-- ^ image -->
+        <div class="p-image">
+            <% if (profile.avatar_url) { %>
+                <img
+                src="<%= profile.avatar_url %>"
+                alt="<%= profile.user_name %>"
+                class="avatar-sm"
+                />
+            <% } else { %>
+                <div class="avatar-xl avatar-placeholder">
+                    <%= profile.user_name.charAt(0).toUpperCase() %>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- ^ name and bio -->
+        <div class="p-info">
+            <h2><%= profile.user_name %></h2>
+            <p><%= profile.bio %>   </p>
+        </div>
+
+        <button class="btn btn-primary btn-sm">
+            Follow
+        </button>
+
+       </div>
+
+        <!-- ^ stats -->
+         <div class="stats">
+
+            <!-- ^ Followers  -->
+             <div class="flwrs">
+                <p class="count"><%= meta.totalItems %></p>
+                <p class="count-text">Followers</p>
+             </div>
+            
+            <!-- ^ Post counts -->
+             <div class="postC">
+                <p class="count"><%= meta.totalItems %></p>
+                <p class="count-text">Posts</p>
+             </div>
+         </div>
+    </div>
+
+    <div class="profile-posts">
+
+        <% data.forEach(function(post) { %>
+
+            <!-- !post card -->
+          <article class="post-card">
+
+            <!-- ! Post info -->
+            <div class="post-card-meta">
+              <% if (post.profile&& post.profile.avatar_url) { %>
+                <img src="<%= post.profile.avatar_url %>"
+                     alt="<%= post.profile.user_name %>"
+                     class="avatar-sm" />
+              <% } else { %>
+                <div class="avatar-sm avatar-placeholder">
+                  <%= (post.profile?.user_name ?? 'U').charAt(0).toUpperCase() %>
+                </div>
+              <% } %>
+              <span class="post-author"><%= post.profile?.user_name ?? 'Unknown' %></span>
+              <time class="post-time">
+                <%= new Date(post.created_at).toLocaleDateString() %>
+              </time>
+            </div>
+
+            <!-- ! Post content -->
+            <p class="post-excerpt">
+              <%= post.content ? post.content.slice(0, 200) : '' %>
+              <% if (post.content && post.content.length > 200) { %>...
+              <% } %>
+            </p>
+
+            <!-- ! Post like and comments -->
+            <div class="post-card-footer">
+              <span class="post-stat"><%= post.likes_count ?? 0 %> likes</span>
+              <span class="post-stat"><%= post.comments_count ?? 0 %> comments</span>
+              <a href="/posts/<%= post.id %>" class="btn btn-sm btn-outline">
+                Read more
+              </a>
+            </div>
+          </article>
+
+
+        <% }) %>
+    </div>
+  
+    <% if (meta && meta.totalPages > 1) { %>
+    <div class="pagination">
+      <% if (meta.currentPage > 1) { %>
+        <a href="/profile/<%= profileID%>?page=<%= meta.currentPage - 1 %>"
+           class="btn btn-sm btn-outline">&larr; Prev</a>
+      <% } %>
+      <span class="page-info">
+        Page <%= meta.currentPage %> of <%= meta.totalPages %>
+      </span>
+      <% if (meta.currentPage < meta.totalPages) { %>
+        <a href="/profile/<%= profileID%>?page=<%= meta.currentPage + 1 %>"
+           class="btn btn-sm btn-outline">Next &rarr;</a>
+      <% } %>
+    </div>
+  <% } %>
+
+</div>
+

@@ -155,6 +155,24 @@ export class WebController {
 
     }
 
+    // * Profile by id
+
+    @Get('/profile/:id')
+    @UseGuards(webAuthGuard)
+    async usersProfile(@Req() req: Request, @Res() res: Response, @Paginate() query: PaginateQuery, @Param('id', ParseIntPipe) profileID: number) {
+        const user = (req as any).user;
+        const profile = await this.profileService.findByProfileId(profileID)
+        const posts = await this.postsService.findPostByUser(profileID, query);
+
+        res.render('pages/userProfile', this.contextService.build('/profile', user, {
+            title: profile?.user_name,
+            profile,
+            profileID,
+            data:posts.data,
+            meta:posts.meta
+        }));
+    }
+
     // * ----update avatar
 
     @Post('/profile/avatar')
@@ -244,6 +262,23 @@ export class WebController {
             await this.commentsService.create(profile.id, id, { content: body.content });
         } catch { }
         res.redirect(`/posts/${id}`);
+    }
+
+
+    // * ---- Search
+
+    @Get('/search')
+    @UseGuards(webAuthGuard)
+    async searchUSers(@Req() req: Request, @Res() res: Response, @Query('userName') userName: string, @Paginate() query: PaginateQuery) {
+        const user = (req as any).user;
+        const profiles = await this.profileService.findByUserName(userName, query);
+
+        res.render('pages/search', this.contextService.build('/search', user, {
+            title: 'Search users',
+            profiles: profiles.data,
+            meta: profiles.meta,
+            userName
+        }));
     }
 
 }

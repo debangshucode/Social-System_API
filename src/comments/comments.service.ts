@@ -31,6 +31,7 @@ export class CommentsService {
       },
       relations: ['post', 'profile'],
       sortableColumns: ['created_at'],
+      defaultLimit:3
     });
   }
 

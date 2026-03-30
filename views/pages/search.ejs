@@ -1,0 +1,85 @@
+<div class="search-page">
+
+  <h1>Search users</h1>
+
+  <form method="GET" action="/search" class="search-form">
+    <div class="search-input-wrap">
+      <input
+        type="text"
+        name="userName"
+        value="<%= userName %>"
+        placeholder="Search by username..."
+        autofocus
+        autocomplete="off"
+        class="search-input"
+      />
+      <button type="submit" class="btn btn-primary">Search</button>
+    </div>
+  </form>
+
+  <% if (userName && userName.trim()) { %>
+
+    <% if (!profiles || profiles.length === 0) { %>
+      <div class="search-empty">
+        <p>No users found for <strong>"<%= userName %>"</strong></p>
+      </div>
+    <% } else { %>
+
+      <p class="search-count">
+        <% if (meta && meta.totalItems != null) { %>
+          <%= meta.totalItems %> result<%= meta.totalItems !== 1 ? 's' : '' %> for
+        <% } else { %>
+          Results for
+        <% } %>
+        <strong>"<%= userName %>"</strong>
+      </p>
+
+      <ul class="user-list">
+        <% profiles.forEach(function(profile) { %>
+         <a href="/profile/<%= profile.id %>">
+             <li class="user-card">
+            <div class="user-card-avatar">
+              <% if (profile.avatar_url) { %>
+                <img
+                  src="<%= profile.avatar_url %>"
+                  alt="<%= profile.user_name %>"
+                  class="avatar-sm"
+                />
+              <% } else { %>
+                <div class="avatar-sm avatar-placeholder">
+                  <%= profile.user_name.charAt(0).toUpperCase() %>
+                </div>
+              <% } %>
+            </div>
+            <div class="user-card-info">
+              <span class="user-card-name"><%= profile.user_name %></span>
+              <% if (profile.bio) { %>
+                <span class="user-card-bio"><%= profile.bio %></span>
+              <% } %>
+            </div>
+          </li>
+         </a>
+        <% }) %>
+      </ul>
+
+      <% if (meta && meta.totalPages > 1) { %>
+        <div class="pagination">
+          <% if (meta.currentPage > 1) { %>
+            <a href="/search?userName=<%= encodeURIComponent(userName) %>&page=<%= meta.currentPage - 1 %>"
+               class="btn btn-sm btn-outline">&larr; Prev</a>
+          <% } %>
+          <span class="page-info">
+            Page <%= meta.currentPage %> of <%= meta.totalPages %>
+          </span>
+          <% if (meta.currentPage < meta.totalPages) { %>
+            <a href="/search?userName=<%= encodeURIComponent(userName) %>&page=<%= meta.currentPage + 1 %>"
+               class="btn btn-sm btn-outline">Next &rarr;</a>
+          <% } %>
+        </div>
+      <% } %>
+
+    <% } %>
+
+  <% } %>
+
+</div>
