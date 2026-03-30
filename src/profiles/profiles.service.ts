@@ -23,10 +23,11 @@ export class ProfilesService {
 
   findAll(query: PaginateQuery) {
     return paginate(query, this.profileRepo, {
-      relations: ['users'],
+      relations: ['user'],
       sortableColumns: ['id', 'created_at'],
       searchableColumns: ['user_name'],
-      defaultSortBy: [['id', 'DESC']]
+      defaultSortBy: [['id', 'DESC']],
+      defaultLimit:2
     })
   }
 
@@ -92,7 +93,7 @@ export class ProfilesService {
       relations: ['user'],
       sortableColumns: ['id', 'created_at'],
       defaultSortBy: [['id', 'DESC']],
-      defaultLimit:1
+      defaultLimit:3
     });
   }
 

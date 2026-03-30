@@ -23,6 +23,8 @@
       <div class="search-empty">
         <p>No users found for <strong>"<%= userName %>"</strong></p>
       </div>
+
+      
     <% } else { %>
 
       <p class="search-count">
@@ -81,5 +83,50 @@
     <% } %>
 
   <% } %>
+
+  <ul class="user-list">
+    <h1>People You May Know</h1>
+        <% data.forEach(function(profile) { %>
+         <a href="/profile/<%= profile.id %>">
+             <li class="user-card">
+            <div class="user-card-avatar">
+              <% if (profile.avatar_url) { %>
+                <img
+                  src="<%= profile.avatar_url %>"
+                  alt="<%= profile.user_name %>"
+                  class="avatar-sm"
+                />
+              <% } else { %>
+                <div class="avatar-sm avatar-placeholder">
+                  <%= profile.user_name.charAt(0).toUpperCase() %>
+                </div>
+              <% } %>
+            </div>
+            <div class="user-card-info">
+              <span class="user-card-name"><%= profile.user_name %></span>
+              <% if (profile.bio) { %>
+                <span class="user-card-bio"><%= profile.bio %></span>
+              <% } %>
+            </div>
+          </li>
+         </a>
+        <% }) %>
+      </ul>
+
+      <% if (allMeta && allMeta.totalPages > 1) { %>
+        <div class="pagination">
+          <% if (allMeta.currentPage > 1) { %>
+            <a href="/search?page=<%= allMeta.currentPage - 1 %>"
+               class="btn btn-sm btn-outline">&larr; Prev</a>
+          <% } %>
+          <span class="page-info">
+            Page <%= allMeta.currentPage %> of <%= allMeta.totalPages %>
+          </span>
+          <% if (allMeta.currentPage < allMeta.totalPages) { %>
+            <a href="/search?page=<%= allMeta.currentPage + 1 %>"
+               class="btn btn-sm btn-outline">Next &rarr;</a>
+          <% } %>
+        </div>
+      <% } %>
 
 </div>

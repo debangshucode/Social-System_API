@@ -546,6 +546,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  margin-top: 10px;
 }
 
 .user-card {
@@ -661,3 +662,4 @@ a {
   background-color: #c92934;
   color: white;
 }
+

@@ -302,12 +302,15 @@ export class WebController {
     async searchUSers(@Req() req: Request, @Res() res: Response, @Query('userName') userName: string, @Paginate() query: PaginateQuery) {
         const user = (req as any).user;
         const profiles = await this.profileService.findByUserName(userName, query);
+        const allProfile = await this.profileService.findAll(query);
 
         res.render('pages/search', this.contextService.build('/search', user, {
             title: 'Search users',
             profiles: profiles.data,
             meta: profiles.meta,
-            userName
+            userName,
+            data:allProfile.data,
+            allMeta:allProfile.meta
         }));
     }
 
@@ -346,4 +349,23 @@ export class WebController {
         catch { }
         res.redirect(`/profile/${id}`);
     }
+
+    // @Get('/profile/:id/unfollow')
+    // @UseGuards(webAuthGuard)
+    // async unfollow(
+    //     @Req() req: Request,
+    //     @Res() res: Response,
+    //     @Param('id', ParseIntPipe) id: number
+    // ) {
+
+    //     const user = (req as any).user;
+    //     const profile = await this.profileService.findByUserId(user.sub);
+    //     if (!profile) throw new NotFoundException('profile not found');
+    //     try {
+    //         await this.followService.remove(profile.id, id)
+    //     }
+    //     catch { }
+    //     res.redirect(`/profile/${id}`);
+    // }
+
 }
