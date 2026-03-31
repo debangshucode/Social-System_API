@@ -86,8 +86,14 @@ export class WebController {
         @Paginate() query: PaginateQuery,
     ) {
         const user = (req as any).user;
-        const profile = await this.profileService.findByUserId(user.sub) as Profile;
-        const reqCount = await this.followService.countPending(profile.id);
+        let reqCount: null | number;
+        const profile = await this.profileService.findByUserId(user.sub);
+        if (!profile) {
+            reqCount = null;
+        }
+        else {
+            reqCount = await this.followService.countPending(profile.id);
+        }
         const result = await this.postsService.findAll(query);
         res.render('pages/feed', this.contextService.build('/feed', user, {
             posts: result.data,
@@ -163,7 +169,7 @@ export class WebController {
         } : undefined;
 
         try {
-            await this.postsService.create(profile.id, body,media);
+            await this.postsService.create(profile.id, body, media);
         }
         catch { }
         res.redirect('/feed')
@@ -180,14 +186,31 @@ export class WebController {
         @Paginate() query: PaginateQuery
     ) {
         const user = (req as any).user;
-
-        const curUserProfile = await this.profileService.findOne(user.sub);
-        const reqCount = await this.followService.countPending(curUserProfile.id);
+        let reqCount: number | null;
+        let hasProfile: boolean;
+        const curUserProfile = await this.profileService.findByUserId(user.sub);
         if (!curUserProfile) {
-            return res.redirect('/create-profile');
+            return res.render('pages/profile', this.contextService.build('/profile', user, {
+                title: 'My profile',
+                profile: null,
+                hasProfile: false,
+                isOwnProfile: true,
+                reqCount: 0,
+                data: [],
+                meta: null,
+                fData: [],
+                fMeta: null,
+                flData: [],
+                flMeta: null,
+            }));
         }
 
-        const profileID = curUserProfile.id;
+        else {
+            reqCount = await this.followService.countPending(curUserProfile.id);
+            hasProfile = true;
+        }
+
+        const profileID = curUserProfile?.id as number;
 
         const posts = await this.postsService.findPostByUser(profileID, query);
         const follower = await this.followService.findAll(query, profileID);
@@ -196,7 +219,7 @@ export class WebController {
         res.render(
             'pages/profile',
             this.contextService.build('/profile', user, {
-                title: curUserProfile.user_name,
+                title: curUserProfile?.user_name,
                 profile: curUserProfile,
                 profileID,
                 data: posts.data,
@@ -206,7 +229,7 @@ export class WebController {
                 flMeta: following.meta,
                 flData: following.data,
                 curUserProfile,
-                hasProfile: true,
+                hasProfile,
                 isOwnProfile: true,
                 reqCount
             }),
@@ -222,11 +245,7 @@ export class WebController {
         let hasProfile = true;
         try {
             profile = await this.profileService.create(user.sub, body)
-            res.render('pages/profile', this.contextService.build('/profile', user, {
-                title: profile?.user_name ?? 'My profile',
-                profile,
-                hasProfile
-            }));
+            res.redirect('/profile')
         }
         catch (err) {
             throw err;
@@ -240,12 +259,22 @@ export class WebController {
     @UseGuards(webAuthGuard)
     async usersProfile(@Req() req: Request, @Res() res: Response, @Paginate() query: PaginateQuery, @Param('id', ParseIntPipe) profileID: number) {
         const user = (req as any).user;
+        let reqCount;
         const profile = await this.profileService.findByProfileId(profileID);
-        const curUserProfile = await this.profileService.findByUserId(user.sub) as Profile;
+        const curUserProfile = await this.profileService.findByUserId(user.sub);
+
+        if (!curUserProfile) {
+            reqCount = null;
+            return res.redirect('/profile')
+        }
+        else {
+            reqCount = await this.followService.countPending(curUserProfile.id);
+        }
+
         const posts = await this.postsService.findPostByUser(profileID, query);
         const follower = await this.followService.findAll(query, profileID);
         const following = await this.followService.findAllFollowing(query, profileID);
-        const reqCount = await this.followService.countPending(curUserProfile.id);
+
         const isFollowing = await this.followService.isFollowing(
             curUserProfile.id,
             profileID
@@ -374,8 +403,14 @@ export class WebController {
         const user = (req as any).user;
         const profiles = await this.profileService.findByUserName(userName, query);
         const allProfile = await this.profileService.findAll(query);
-        const curUserProfile = await this.profileService.findByUserId(user.sub) as Profile;
-        const reqCount = await this.followService.countPending(curUserProfile.id);
+        let reqCount: number | null;
+        const curUserProfile = await this.profileService.findByUserId(user.sub);
+        if (!curUserProfile) {
+            reqCount = null;
+        }
+        else {
+            reqCount = await this.followService.countPending(curUserProfile.id);
+        }
 
         res.render('pages/search', this.contextService.build('/search', user, {
             title: 'Search users',

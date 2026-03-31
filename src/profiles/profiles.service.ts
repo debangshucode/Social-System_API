@@ -80,7 +80,6 @@ export class ProfilesService {
   async findByUserId(id: number) {
     const profile = await this.profileRepo.findOne({
       where: { user: { id } },
-      select: ['id', 'cloudinary_public_id'],
       relations: { user: true }
     });
     return profile;
