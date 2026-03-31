@@ -49,12 +49,14 @@ export class WebController {
         @Paginate() query: PaginateQuery,
     ) {
         const user = (req as any).user;
-
+        const profile = await this.profileService.findByUserId(user.sub) as Profile;
+        const reqCount = await this.followService.countPending(profile.id);
         const result = await this.postsService.findAll(query);
         res.render('pages/feed', this.contextService.build('/feed', user, {
             posts: result.data,
             meta: result.meta,
             link: result.links,
+            reqCount
         }))
     }
 
@@ -73,6 +75,7 @@ export class WebController {
         const post = await this.postsService.findOne(id);
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) throw new NotFoundException('Profile not found');
+        const reqCount = await this.followService.countPending(profile.id);
 
         const postForView = {
             ...post,
@@ -87,6 +90,7 @@ export class WebController {
             comments: comments.data,
             commentsMeta: comments.meta,
             commentsLink: comments.links,
+            reqCount
         }))
     }
 
@@ -123,7 +127,7 @@ export class WebController {
         const user = (req as any).user;
 
         const curUserProfile = await this.profileService.findOne(user.sub);
-
+        const reqCount = await this.followService.countPending(curUserProfile.id);
         if (!curUserProfile) {
             return res.redirect('/create-profile');
         }
@@ -148,7 +152,8 @@ export class WebController {
                 flData: following.data,
                 curUserProfile,
                 hasProfile: true,
-                isOwnProfile: true
+                isOwnProfile: true,
+                reqCount
             }),
         );
     }
@@ -185,22 +190,31 @@ export class WebController {
         const posts = await this.postsService.findPostByUser(profileID, query);
         const follower = await this.followService.findAll(query, profileID);
         const following = await this.followService.findAllFollowing(query, profileID);
+        const reqCount = await this.followService.countPending(curUserProfile.id);
         const isFollowing = await this.followService.isFollowing(
             curUserProfile.id,
             profileID
         );
-        res.render('pages/userProfile', this.contextService.build('/profile', user, {
-            title: profile?.user_name,
-            profile,
-            profileID,
-            data: posts.data,
-            meta: posts.meta,
-            fMeta: follower.meta,
-            fData: follower.data,
-            flMeta: following.meta,
-            flData: following.data,
-            isFollowing
-        }));
+
+        if (profile?.id === curUserProfile.id) {
+            res.redirect('/profile')
+        }
+
+        else {
+            res.render('pages/userProfile', this.contextService.build('/profile', user, {
+                title: profile?.user_name,
+                profile,
+                profileID,
+                data: posts.data,
+                meta: posts.meta,
+                fMeta: follower.meta,
+                fData: follower.data,
+                flMeta: following.meta,
+                flData: following.data,
+                isFollowing,
+                reqCount
+            }));
+        }
     }
 
     // * ----update avatar
@@ -214,8 +228,9 @@ export class WebController {
             res.redirect('/profile')
         }
         catch (err) {
-            res.redirect('/profile')
+            
             throw err;
+            res.redirect('/profile')
         }
     }
 
@@ -229,8 +244,9 @@ export class WebController {
             res.redirect('/profile')
         }
         catch (err) {
-            res.redirect('/profile')
             throw err;
+            res.redirect('/profile')
+            
         }
     }
 
@@ -303,6 +319,8 @@ export class WebController {
         const user = (req as any).user;
         const profiles = await this.profileService.findByUserName(userName, query);
         const allProfile = await this.profileService.findAll(query);
+        const curUserProfile =await this.profileService.findByUserId(user.sub) as Profile;
+        const reqCount = await this.followService.countPending(curUserProfile.id);
 
         res.render('pages/search', this.contextService.build('/search', user, {
             title: 'Search users',
@@ -310,7 +328,8 @@ export class WebController {
             meta: profiles.meta,
             userName,
             data: allProfile.data,
-            allMeta: allProfile.meta
+            allMeta: allProfile.meta,
+            reqCount
         }));
     }
 
@@ -373,36 +392,58 @@ export class WebController {
     // }
 
 
+    // * follow req notifications 
     @Get('/notification')
     @UseGuards(webAuthGuard)
     async notification(
-        @Req() req:Request,
-        @Res() res:Response,
-        @Paginate() query:PaginateQuery 
-    ){
+        @Req() req: Request,
+        @Res() res: Response,
+        @Paginate() query: PaginateQuery
+    ) {
         const user = (req as any).user;
         const profile = await this.profileService.findOne(user.sub);
-        if(!profile) throw new NotFoundException('profile not found');
-        const follower = await this.followService.findAll(query, profile.id);
+        if (!profile) throw new NotFoundException('profile not found');
+        const follower = await this.followService.findPending(query, profile.id);
+        const reqCount = await this.followService.countPending(profile.id);
         console.log(follower.data)
         res.render(
             'pages/notification',
             this.contextService.build('/notification', user, {
                 title: 'notification',
                 profile: profile.user_name,
-                id:profile.id,
-                // data: posts.data,
-                // meta: posts.meta,
+                id: profile.id,
                 fMeta: follower.meta,
                 fData: follower.data,
-                // flMeta: following.meta,
-                // flData: following.data,
-                // curUserProfile,
-                // hasProfile: true,
-                // isOwnProfile: true
+                reqCount
             }),
         );
 
     }
+
+
+    // *Accept follow req
+
+    @Post('/request/accept/:id')
+    @UseGuards(webAuthGuard)
+    async acceptReq(
+        @Res() res: Response,
+        @Param('id', ParseIntPipe) followId: number
+    ) {
+        await this.followService.acceptFollow(followId);
+
+        res.redirect(`/notification`);
+    }
+
+    @Post('/request/reject/:id')
+    @UseGuards(webAuthGuard)
+    async rejectReq(
+        @Res() res: Response,
+        @Param('id', ParseIntPipe) followId: number
+    ) {
+        await this.followService.rejectFollow(followId);
+
+        res.redirect(`/notification`);
+    }
+
 
 }

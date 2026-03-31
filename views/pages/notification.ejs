@@ -8,6 +8,7 @@
         <% fData.forEach(function(followReq) { %>
                 <a href="/profile/<%= followReq.follower.id %>">
                     <li class="user-card">
+                        <p style="width: 100%;">Follow request</p>
                         <div class="users-data">
                             <div class="user-card-avatar">
                                 <% if (followReq.follower.avatar_url) { %>
@@ -33,7 +34,7 @@
 
                         <div class="actions">
                             <!-- accept  -->
-                            <form method="" action="">
+                            <form method="POST" action="/request/accept/<%= followReq.id %>">
                                 <button type="submit" class="btn btn-primary btn-sm">
                                   Accept
                                 </button>
@@ -41,7 +42,7 @@
                             </form>
 
                             <!-- Reject -->
-                            <form method="" action="">
+                            <form method="POST" action="/request/reject/<%= followReq.id %>">
                                <button type="submit" class="btn btn-primary btn-sm">
                                  Reject
                                </button>

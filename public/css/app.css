@@ -733,6 +733,7 @@ a {
 .notification-page .user-card {
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap
 }
 
 .notification-page .user-card .users-data {
