@@ -117,7 +117,7 @@ export class WebController {
 
         const post = await this.postsService.findOne(id);
         const profile = await this.profileService.findByUserId(user.sub);
-        if (!profile) throw new NotFoundException('Profile not found');
+        if (!profile) return res.redirect('/profile')
         const reqCount = await this.followService.countPending(profile.id);
 
         const postForView = {
@@ -491,8 +491,8 @@ export class WebController {
         @Paginate() query: PaginateQuery
     ) {
         const user = (req as any).user;
-        const profile = await this.profileService.findOne(user.sub);
-        if (!profile) throw new NotFoundException('profile not found');
+        const profile = await this.profileService.findByUserId(user.sub);
+        if (!profile) return res.redirect('/profile');
         const follower = await this.followService.findPending(query, profile.id);
         const reqCount = await this.followService.countPending(profile.id);
         console.log(follower.data)
