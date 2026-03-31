@@ -90,11 +90,19 @@ export class WebController {
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) {
             reqCount = null;
+            return res.redirect('/profile')
         }
         else {
             reqCount = await this.followService.countPending(profile.id);
         }
-        const result = await this.postsService.findAll(query);
+        // const result = await this.postsService.findAll(query);
+
+        const followingIds = await this.followService.findFollowingIds(profile.id);
+
+        const ids = [profile.id, ...followingIds];
+
+        const result = await this.postsService.findPostsByFollowing(query, ids);
+
         res.render('pages/feed', this.contextService.build('/feed', user, {
             posts: result.data,
             meta: result.meta,
@@ -242,9 +250,24 @@ export class WebController {
     async createProfile(@Req() req: Request, @Body() body: CreateProfileDto, @Res() res: Response) {
         const user = (req as any).user;
         let profile: Profile | null = null
-        let hasProfile = true;
         try {
             profile = await this.profileService.create(user.sub, body)
+            res.redirect('/profile')
+        }
+        catch (err) {
+            throw err;
+        }
+
+    }
+
+    // * Edit Profile
+    @Post('/profile/edit')
+    @UseGuards(webAuthGuard)
+    async editProfile(@Req() req: Request, @Body() body: CreateProfileDto, @Res() res: Response) {
+        const user = (req as any).user;
+        let profile: Profile | null = null
+        try {
+            profile = await this.profileService.update(user.sub, body)
             res.redirect('/profile')
         }
         catch (err) {
@@ -495,7 +518,6 @@ export class WebController {
         if (!profile) return res.redirect('/profile');
         const follower = await this.followService.findPending(query, profile.id);
         const reqCount = await this.followService.countPending(profile.id);
-        console.log(follower.data)
         res.render(
             'pages/notification',
             this.contextService.build('/notification', user, {

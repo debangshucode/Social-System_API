@@ -47,11 +47,24 @@
       </div>
 
       <!-- OWN PROFILE ACTION -->
-      <!-- <div>
-        <a href="/profile/edit" class="btn btn-outline btn-sm">
+      <div class="edit-profile">
+        <a href="#" id="editBtn" class="btn btn-outline btn-sm" style="display: block;">
           Edit Profile
         </a>
-      </div> -->
+        <form id="editForm" method="POST" action="/profile/edit" style="display:none;">
+            <div class="form-group" style="text-align:left">
+              <label for="user_name">Username</label>
+              <input id="user_name" type="text" name="user_name"
+                     minlength="3" maxlength="30" value="<%= profile.user_name %>"
+                     placeholder="<%= profile.user_name %>" />
+            </div>
+            <div class="form-group" style="text-align:left">
+               <label for="bio">Bio <span style="color:#aaa;font-weight:400">(optional)</span></label>
+             <textarea id="bio" name="bio" rows="3" maxlength="300"><%= profile.bio %></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save profile</button>
+          </form>
+      </div>
 
     </div>
 
@@ -210,6 +223,16 @@
   userKey: 'following'
 }) %>
 
+<script>
+  const editBtn = document.getElementById("editBtn");
+  const form = document.getElementById("editForm");
+
+  editBtn.addEventListener("click", function (e) {
+    e.preventDefault();
+    form.style.display = "block";
+    editBtn.style.display = "none";
+  });
+</script>
 
 <script>
   document.addEventListener('click', (e) => {

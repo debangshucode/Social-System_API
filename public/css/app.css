@@ -649,6 +649,7 @@ a {
   font-size: 2rem;
 }
 .img-info {
+  width: 25%;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -657,6 +658,7 @@ a {
 
 .img-info .btn {
   font-size: large;
+  width: fit-content;
 }
 .btn-danger {
   background-color: #c92934;
@@ -759,4 +761,15 @@ a {
 }
 .post-media{
   margin-top: 15px;
+}
+
+#editForm{
+  width: 100%;
+
+}
+
+.edit-profile{
+  width: 100%;
+  display: flex;
+  justify-content:center ;
 }

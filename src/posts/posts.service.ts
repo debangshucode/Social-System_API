@@ -131,4 +131,25 @@ export class PostsService {
       defaultLimit: 4
     })
   }
+
+
+  async findPostsByFollowing(query: PaginateQuery,followingIds:number[]) {
+    const db = this.postRepo
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.profile', 'author')
+      .leftJoinAndSelect('author.user', 'user')
+      .loadRelationCountAndMap('post.likes_count', 'post.likes')
+      .loadRelationCountAndMap('post.comments_count', 'post.comments')
+      .where('author.id IN (:...followingIds)', { followingIds })
+
+    return paginate(query, db, {
+      sortableColumns: ['created_at'],
+      defaultSortBy: [['created_at', 'DESC']],
+      searchableColumns: ['content'],
+      filterableColumns: {
+        likes_count: [FilterOperator.GT]
+      },
+      defaultLimit: 2
+    })
+  }
 }

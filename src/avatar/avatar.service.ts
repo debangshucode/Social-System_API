@@ -14,10 +14,10 @@ export class AvatarService {
         const timeStamp = Math.round(Date.now() / 1000);
 
         const folder = `avatars/users/${userId}`;
-        const publicId = `avatars/users/${userId}/avatar_${userId}`;
+        const publicId = `avatars/users/${userId}/avatar_${userId}_${Date.now()}`;
 
         const paramString = `public_id=${publicId}&timestamp=${timeStamp}`;
-        
+
         const signature = createHash('sha1').update(paramString + this.config.get('CLOUDINARY_API_SECRET')).digest('hex');
 
 
@@ -33,14 +33,14 @@ export class AvatarService {
 
     async updateAvatar(userId: number, publicId: string) {
         // guard 1 - "User 1" can not save "User 2" profile pic as there own"
-        const expected = `avatars/users/${userId}/avatar_${userId}`;
-        if (publicId !== expected) {
+        const expectedPrefix = `avatars/users/${userId}/avatar_${userId}_`;
+        if (!publicId.startsWith(expectedPrefix)) {
             throw new BadRequestException('This image does not belong to your profile');
         }
 
         // guard 2 "prevents users from giving a cloudinary formated url - which is acctualy not present in the cloudinary database"
         try {
-            cloudinary.api.resource(publicId);
+            await cloudinary.api.resource(publicId);
         }
         catch {
             throw new BadRequestException('Image not found in Database please upload it first');

@@ -92,6 +92,19 @@ export class FollowService {
         });
     }
 
+    async findFollowingIds(followerId: number) {
+        const rows = await this.followRepo.find({
+            where: {
+                follower_id: followerId,
+                status: follow_status.ACCEPT,
+            },
+            select: ['following_id'],
+        });
+
+        return rows.map((r) => r.following_id);
+    }
+
+
     // pending req
     async findPending(query: PaginateQuery, profileId: number) {
         const db = this.followRepo.createQueryBuilder('follows')
@@ -126,7 +139,7 @@ export class FollowService {
 
 
     async isFollowing(currentUserId: number, profileID: number) {
-        const following = await this.followRepo.findOne({ where: { follower_id: currentUserId, following_id: profileID , status:follow_status.ACCEPT } });
+        const following = await this.followRepo.findOne({ where: { follower_id: currentUserId, following_id: profileID, status: follow_status.ACCEPT } });
         if (!following) return false
 
         return true;
