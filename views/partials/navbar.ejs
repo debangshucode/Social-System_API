@@ -2,6 +2,7 @@
   <a class="navbar-brand" href="/">App</a>
   <div class="navbar-right">
     <% if (typeof user !== 'undefined' && user) { %>
+      <a href="/notification"><i class="fa-solid fa-bell"></i></a>
       <span class="navbar-user">
         <%= user.first_name ?? user.email %>
       </span>

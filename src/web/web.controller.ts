@@ -372,4 +372,37 @@ export class WebController {
 
     // }
 
+
+    @Get('/notification')
+    @UseGuards(webAuthGuard)
+    async notification(
+        @Req() req:Request,
+        @Res() res:Response,
+        @Paginate() query:PaginateQuery 
+    ){
+        const user = (req as any).user;
+        const profile = await this.profileService.findOne(user.sub);
+        if(!profile) throw new NotFoundException('profile not found');
+        const follower = await this.followService.findAll(query, profile.id);
+        console.log(follower.data)
+        res.render(
+            'pages/notification',
+            this.contextService.build('/notification', user, {
+                title: 'notification',
+                profile: profile.user_name,
+                id:profile.id,
+                // data: posts.data,
+                // meta: posts.meta,
+                fMeta: follower.meta,
+                fData: follower.data,
+                // flMeta: following.meta,
+                // flData: following.data,
+                // curUserProfile,
+                // hasProfile: true,
+                // isOwnProfile: true
+            }),
+        );
+
+    }
+
 }

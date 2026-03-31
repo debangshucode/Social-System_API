@@ -1,0 +1,56 @@
+<div class="notification-page">
+    <h1>Notifications</h1>
+    <h2 class="notification-pf-name">@<%= profile %></h2>
+
+    <div class="notifications">
+
+        <ul class="user-list">
+        <% fData.forEach(function(followReq) { %>
+                <a href="/profile/<%= followReq.follower.id %>">
+                    <li class="user-card">
+                        <div class="users-data">
+                            <div class="user-card-avatar">
+                                <% if (followReq.follower.avatar_url) { %>
+                                    <img
+                                        src="<%= followReq.follower.avatar_url %>"
+                                        alt="<%= followReq.follower.user_name %>"
+                                        class="avatar-sm"
+                                    />
+                                <% } else { %>
+                                    <div class="avatar-sm avatar-placeholder">
+                                    <%= followReq.follower.user_name.charAt(0).toUpperCase() %>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <div class="user-card-info">
+                                <span class="user-card-name"><%= followReq.follower.user_name %></span>
+                                    <% if (followReq.follower.bio) { %>
+                                        <span class="user-card-bio"><%= followReq.follower.bio %></span>
+                                    <% } %>
+                            </div>
+                        </div>
+                      
+
+                        <div class="actions">
+                            <!-- accept  -->
+                            <form method="" action="">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                  Accept
+                                </button>
+            
+                            </form>
+
+                            <!-- Reject -->
+                            <form method="" action="">
+                               <button type="submit" class="btn btn-primary btn-sm">
+                                 Reject
+                               </button>
+                            </form>
+                        </div>
+
+                    </li>
+                </a>
+        <% }) %>
+      </ul>
+    </div>
+</div>
