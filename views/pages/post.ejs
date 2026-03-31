@@ -17,6 +17,21 @@
 
   <div class="post-body"><%= post.content %></div>
 
+  <% if (post.media_path) { %>
+      <div class="post-media" style="margin-bottom:1rem">
+        <% if (post.media_type === 'VIDEO') { %>
+          <video controls style="width:100%;max-height:420px;border-radius:10px">
+            <source src="<%= post.media_path %>" type="<%= post.media_mime || 'video/mp4' %>" />
+          </video>
+        <% } else { %>
+          <img
+            src="<%= post.media_path %>"
+            alt="Post media"
+            style="width:100%;max-height:420px;object-fit:cover;border-radius:10px" />
+        <% } %>
+      </div>
+    <% } %>
+
   <!-- Like / Unlike — works without JS, two separate forms -->
   <div class="post-actions">
     <% if (post.liked_by_me) { %>

@@ -126,7 +126,7 @@ export class FollowService {
 
 
     async isFollowing(currentUserId: number, profileID: number) {
-        const following = await this.followRepo.findOne({ where: { follower_id: currentUserId, following_id: profileID } });
+        const following = await this.followRepo.findOne({ where: { follower_id: currentUserId, following_id: profileID , status:follow_status.ACCEPT } });
         if (!following) return false
 
         return true;

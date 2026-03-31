@@ -3,6 +3,10 @@ import { Like } from "src/likes/entities/like.entity";
 import { Profile } from "src/profiles/entities/profile.entity";
 import { Column, UpdateDateColumn, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, JoinColumn } from "typeorm";
 
+export enum media_type {
+    IMAGE = 'IMAGE',
+    VIDEO = 'VIDEO'
+}
 @Entity('posts')
 export class Post {
     @PrimaryGeneratedColumn()
@@ -12,6 +16,25 @@ export class Post {
         type: 'text'
     })
     content: string;
+
+    @Column({
+        nullable: true,
+        type:"varchar"
+    })
+    media_path: string | null;
+
+    @Column({
+        type:'enum',
+        enum: media_type,
+        nullable: true
+    })
+    media_type: media_type | null;
+
+    @Column({
+        nullable: true,
+        type:'varchar'
+    })
+    media_mime: string | null;
 
     @CreateDateColumn()
     created_at: Date;

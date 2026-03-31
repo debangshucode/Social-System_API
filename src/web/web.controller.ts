@@ -14,8 +14,14 @@ import { Profile } from "src/profiles/entities/profile.entity";
 import { CreateProfileDto } from "src/profiles/dto/create-profile.dto";
 import { UpdateAvatarDto } from "src/avatar/dto/update-avatar.dto";
 import { AvatarService } from "src/avatar/avatar.service";
-import { error } from "console";
 import { FollowService } from "src/follow/follow.service";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { UseInterceptors, UploadedFile, BadRequestException } from "@nestjs/common";
+import { diskStorage } from "multer";
+import type { Express } from "express";
+import { extname } from "path";
+import { media_type } from "src/posts/entities/post.entity";
+
 
 
 @Controller()
@@ -30,6 +36,37 @@ export class WebController {
         private readonly avatarService: AvatarService,
         private readonly followService: FollowService
     ) { }
+
+    // & File upload helper functions
+
+    private static postMediaFileFilter(
+        req: Request,
+        file: Express.Multer.File,
+        cb: (error: Error | null, acceptFile: boolean) => void,
+    ) {
+        const allowed = [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'video/mp4',
+            'video/webm',
+        ];
+        if (!allowed.includes(file.mimetype)) {
+            return cb(new BadRequestException('Only jpg, png, webp, mp4, webm files are allowed') as any, false);
+        }
+        cb(null, true);
+    }
+
+    private static postMEdiaFilename(
+        req: Request,
+        file: Express.Multer.File,
+        cb: (error: Error | null, filename: string) => void
+    ) {
+        const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        cb(null, `${unique}${extname(file.originalname)}`);
+    }
+
+    // & File upload helper functions END
 
     // * ----Home Page
 
@@ -96,19 +133,37 @@ export class WebController {
 
 
     // * ---- Create Post
+    // & with file upload
     @Post('/feed/post')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(
+        FileInterceptor('media', {
+            storage: diskStorage({
+                destination: './public/uploads/posts',
+                filename: WebController.postMEdiaFilename,
+            }),
+            fileFilter: WebController.postMediaFileFilter,
+            limits: { fileSize: 10 * 1024 * 1024 }
+        }),
+    )
     async createPost(
         @Req() req: Request,
         @Res() res: Response,
-        @Body() body: CreatePostDto
+        @Body() body: CreatePostDto,
+        @UploadedFile() file?: Express.Multer.File,
     ) {
         const user = (req as any).user;
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) throw new NotFoundException('profile not found');
 
+        const media = file ? {
+            media_path: `/uploads/posts/${file.filename}`,
+            media_type: file.mimetype.startsWith('video/') ? media_type.VIDEO : media_type.IMAGE,
+            media_mime: file.mimetype,
+        } : undefined;
+
         try {
-            await this.postsService.create(profile.id, body);
+            await this.postsService.create(profile.id, body,media);
         }
         catch { }
         res.redirect('/feed')
@@ -228,7 +283,7 @@ export class WebController {
             res.redirect('/profile')
         }
         catch (err) {
-            
+
             throw err;
             res.redirect('/profile')
         }
@@ -246,7 +301,7 @@ export class WebController {
         catch (err) {
             throw err;
             res.redirect('/profile')
-            
+
         }
     }
 
@@ -319,7 +374,7 @@ export class WebController {
         const user = (req as any).user;
         const profiles = await this.profileService.findByUserName(userName, query);
         const allProfile = await this.profileService.findAll(query);
-        const curUserProfile =await this.profileService.findByUserId(user.sub) as Profile;
+        const curUserProfile = await this.profileService.findByUserId(user.sub) as Profile;
         const reqCount = await this.followService.countPending(curUserProfile.id);
 
         res.render('pages/search', this.contextService.build('/search', user, {

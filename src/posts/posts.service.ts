@@ -3,7 +3,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Post } from './entities/post.entity';
+import { media_type, Post } from './entities/post.entity';
 import { object } from 'joi';
 import { Profile } from 'src/profiles/entities/profile.entity';
 import { user_role } from 'src/users/entities/user.entity';
@@ -29,9 +29,16 @@ export class PostsService {
   }
 
 
-  async create(id: number, createPostDto: CreatePostDto) {
+  async create(id: number, createPostDto: CreatePostDto,
+    media?: {
+      media_path: string;
+      media_type: media_type;
+      media_mime: string;
+    }
+  ) {
     const post = this.postRepo.create({
       ...createPostDto,
+      ...(media ?? {}),
       profile: { id } as any,
     });
 
@@ -105,7 +112,7 @@ export class PostsService {
   }
 
 
-  async findPostByUser(profileId: number,query:PaginateQuery) {
+  async findPostByUser(profileId: number, query: PaginateQuery) {
     const db = this.postRepo
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.profile', 'author')
