@@ -44,7 +44,7 @@ export class WebAuthController {
         });
       }
 
-      res.redirect('/feed');
+      res.redirect('/profile');
     } catch {
       res.render('pages/login', {
         ...this.contextService.build('/login', null, { title: 'Login' }),
@@ -83,7 +83,7 @@ export class WebAuthController {
         });
       }
 
-      res.redirect('/feed');
+      res.redirect('/profile');
     } catch (e) {
       res.render('pages/signup', {
         ...this.contextService.build('/signup', null, { title: 'Create account' }),
