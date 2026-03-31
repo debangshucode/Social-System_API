@@ -47,11 +47,11 @@
       </div>
 
       <!-- OWN PROFILE ACTION -->
-      <div>
+      <!-- <div>
         <a href="/profile/edit" class="btn btn-outline btn-sm">
           Edit Profile
         </a>
-      </div>
+      </div> -->
 
     </div>
 
@@ -61,14 +61,21 @@
         <p class="count"><%= meta.totalItems %></p>
         <p>Posts</p>
       </div>
-      <div>
-        <p class="count"><%= fMeta.totalItems %></p>
-        <p>Followers</p>
+
+      <div class="flwrs">
+        <button type="button" class="stat-btn" data-open-modal="followersModal">
+          <p class="count"><%= fMeta.totalItems %></p>
+          <p class="count-text">Followers</p>
+        </button>
       </div>
-      <div>
-        <p class="count"><%= flMeta.totalItems %></p>
-        <p>Following</p>
+
+      <div class="postC">
+        <button type="button" class="stat-btn" data-open-modal="followingModal">
+          <p class="count"><%= flMeta.totalItems %></p>
+          <p class="count-text">Followings</p>
+        </button>
       </div>
+
     </div>
 
   </div>
@@ -189,6 +196,48 @@
 </div>
 
 <% } %>
+<%- include('../partials/follow-list-modal', {
+  modalId: 'followersModal',
+  title: 'Followers',
+  items: fData,
+  userKey: 'follower'
+}) %>
+
+<%- include('../partials/follow-list-modal', {
+  modalId: 'followingModal',
+  title: 'Following',
+  items: flData,
+  userKey: 'following'
+}) %>
+
+
+<script>
+  document.addEventListener('click', (e) => {
+    const openBtn = e.target.closest('[data-open-modal]');
+    if (openBtn) {
+      const id = openBtn.getAttribute('data-open-modal');
+      const modal = document.getElementById(id);
+      if (modal) modal.hidden = false;
+    }
+
+    if (e.target.matches('[data-close-modal]')) {
+      const modal = e.target.closest('.modal-backdrop');
+      if (modal) modal.hidden = true;
+    }
+
+    if (e.target.classList.contains('modal-backdrop')) {
+      e.target.hidden = true;
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-backdrop').forEach(m => m.hidden = true);
+    }
+  });
+</script>
+
+
 
 <script>
   async function handleAvatarFile(input) {

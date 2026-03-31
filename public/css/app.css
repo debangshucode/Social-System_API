@@ -757,3 +757,6 @@ a {
 .notification-page .user-list *{
   font-size: large;
 }
+.post-media{
+  margin-top: 15px;
+}

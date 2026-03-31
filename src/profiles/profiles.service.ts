@@ -27,7 +27,7 @@ export class ProfilesService {
       sortableColumns: ['id', 'created_at'],
       searchableColumns: ['user_name'],
       defaultSortBy: [['id', 'DESC']],
-      defaultLimit:2
+      defaultLimit:5
     })
   }
 
