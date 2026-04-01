@@ -73,7 +73,7 @@
 
       
       <div class="flwrs">
-        <button type="button" class="stat-btn" data-open-modal="followersModal">
+        <button type="button" class="stat-btn" >
           <p class="count"><%= meta.totalItems %></p>
           <p class="count-text">Posts</p>
         </button>
@@ -217,14 +217,24 @@
   modalId: 'followersModal',
   title: 'Followers',
   items: fData,
-  userKey: 'follower'
+  meta:fMeta,
+  userKey: 'follower',
+  basePath: '/profile',
+  pageParam: 'followersPage',
+  otherPageParam: 'followingPage',
+  otherCurrentPage: flMeta?.currentPage || 1
 }) %>
 
 <%- include('../partials/follow-list-modal', {
   modalId: 'followingModal',
   title: 'Following',
   items: flData,
-  userKey: 'following'
+  meta:flMeta,
+  userKey: 'following',
+  basePath: '/profile',
+  pageParam: 'followersPage',
+  otherPageParam: 'followingPage',
+  otherCurrentPage: flMeta?.currentPage || 1
 }) %>
 
 <script>
@@ -306,3 +316,11 @@
   }
   </script>
 
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const openModalId = params.get('openModal');
+  if (openModalId) {
+    const modal = document.getElementById(openModalId);
+    if (modal) modal.hidden = false;
+  }
+</script>

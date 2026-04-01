@@ -28,6 +28,30 @@
           <% }) %>
         </div>
       <% } %>
+
+      <% if (meta && meta.totalPages > 1) { %>
+        <div class="pagination" style="margin-top:1rem">
+          <% if (meta.currentPage > 1) { %>
+            <a
+              href="<%= basePath %>?page=<%= meta.currentPage - 1 %>&<%= otherPageParam %>=<%= otherCurrentPage || 1 %>&openModal=<%= modalId %>"
+              class="btn btn-sm btn-outline">
+              &larr; Prev
+            </a>
+          <% } %>
+
+          <span class="page-info">
+            Page <%= meta.currentPage %> of <%= meta.totalPages %>
+          </span>
+
+          <% if (meta.currentPage < meta.totalPages) { %>
+            <a
+              href="<%= basePath %>?page=<%= meta.currentPage + 1 %>&<%= otherPageParam %>=<%= otherCurrentPage || 1 %>&openModal=<%= modalId %>"
+              class="btn btn-sm btn-outline">
+              Next &rarr;
+            </a>
+          <% } %>
+        </div>
+      <% } %>
     </div>
   </div>
 </div>
