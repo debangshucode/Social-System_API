@@ -19,7 +19,11 @@ export class FollowService {
                 return existing;
             }
             await this.followRepo.restore(existing.id)
-            return this.followRepo.findOne({ where: { id: existing.id } })
+            const follow =  await this.followRepo.findOne({ where: { id: existing.id } });
+            if(!follow) throw new NotFoundException('No follow found ');
+            follow.status = follow_status.PENDING;
+            await this.followRepo.save(follow)
+            return follow;
         }
 
         try {
@@ -42,7 +46,7 @@ export class FollowService {
         if (!existing) {
             return { message: 'Already unfollowed' }
         }
-        existing.status = follow_status.PENDING;
+        existing.status = follow_status.REJECT;
         await this.followRepo.save(existing)
         await this.followRepo.softDelete(existing.id);
 
@@ -141,10 +145,10 @@ export class FollowService {
 
 
     async isFollowing(currentUserId: number, profileID: number) {
-        const following = await this.followRepo.findOne({ where: { follower_id: currentUserId, following_id: profileID, status: follow_status.ACCEPT } });
-        if (!following) return false
+        const follow = await this.followRepo.findOne({ where: { follower_id: currentUserId, following_id: profileID } });
+        if (!follow) return false
 
-        return true;
+        return follow.status;
     }
 
     async acceptFollow(followId: number) {
@@ -159,7 +163,8 @@ export class FollowService {
     async rejectFollow(followId: number) {
         const follow = await this.followRepo.findOne({ where: { id: followId, status: follow_status.PENDING } });
         if (!follow) throw new NotFoundException('No follow req found ');
-
+        follow.status = follow_status.REJECT;
+        await this.followRepo.save(follow);
         return this.followRepo.softDelete(follow.id)
     }
 

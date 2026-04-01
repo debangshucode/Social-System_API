@@ -305,7 +305,7 @@ export class WebController {
         const follower = await this.followService.findAll(query, profileID);
         const following = await this.followService.findAllFollowing(query, profileID);
 
-        const isFollowing = await this.followService.isFollowing(
+        const followStatus = await this.followService.isFollowing(
             curUserProfile.id,
             profileID
         );
@@ -325,7 +325,7 @@ export class WebController {
                 fData: follower.data,
                 flMeta: following.meta,
                 flData: following.data,
-                isFollowing,
+                followStatus,
                 reqCount: res.locals.reqCount,
                 nCount: res.locals.nCount,
             }));
@@ -361,9 +361,7 @@ export class WebController {
             res.redirect('/profile')
         }
         catch (err) {
-            throw err;
             res.redirect('/profile')
-
         }
     }
 
@@ -541,7 +539,6 @@ export class WebController {
         const follower = await this.followService.findPending(query, profile.id);
 
         const notification = await this.notificationService.getAllUnread(profile.id, query)
-        console.log(notification.data)
         res.render(
             'pages/notification',
             this.contextService.build('/notification', user, {
@@ -571,6 +568,7 @@ export class WebController {
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) return res.redirect('/profile');
         const follower = await this.followService.findPending(query, profile.id);
+        console.log(follower.data)
         res.render(
             'pages/request',
             this.contextService.build('/requests', user, {

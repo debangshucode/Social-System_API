@@ -211,8 +211,8 @@ body {
 }
 
 .btn-primary:hover {
-  background: #3c3489;
-  border-color: #3c3489;
+  background: #2563EB;
+  border-color: #2563EB;
 }
 .btn-outline {
   background: #fff;
@@ -234,6 +234,17 @@ body {
 .btn-full {
   width: 100%;
   justify-content: center;
+}
+.btn-pending{
+  background: #F59E0B;
+  color: #fff;
+  border-color: #F59E0B;
+}
+
+.btn-unfollow {
+  background: #6B7280;
+  color: #fff;
+  border-color: #6B7280;
 }
 
 /* ── Hero ── */

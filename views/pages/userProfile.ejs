@@ -26,19 +26,25 @@
         </div>
 
 
-        <% if (isFollowing) { %>
+        <% if (followStatus === 'ACCEPT') { %>
           <form method="POST" action="/profile/<%= profileID %>/unfollow">
-            <button type="submit" class="btn btn-danger btn-sm">
+            <button type="submit" class="btn btn-unfollow btn-sm">
               Unfollow
             </button>
           </form>
-        <% } else { %>
+        <% } else if(followStatus === 'PENDING'){ %>
+          <form method="">
+              <button type="submit" class="btn btn-pending btn-sm" disabled>
+                Pending...
+              </button>
+          </form>
+        <% } else {%>
           <form method="POST" action="/profile/<%= profileID %>/follow">
               <button type="submit" class="btn btn-primary btn-sm">
                 Follow
               </button>
           </form>
-        <% } %>
+          <% } %>
 
        </div>
 
@@ -72,7 +78,7 @@
          </div>
     </div>
 
-    <% if (isFollowing) { %>
+    <% if (followStatus === 'ACCEPT') { %>
     <div class="profile-posts">
 
         <% data.forEach(function(post) { %>
@@ -138,7 +144,7 @@
       </div>
     <% } %>
   
-    <% if (isFollowing && meta && meta.totalPages > 1) { %>
+    <% if (followStatus === 'ACCEPT' && meta && meta.totalPages > 1) { %>
       <div class="pagination">
         <% if (meta.currentPage > 1) { %>
           <a href="/profile/<%= profileID%>?page=<%= meta.currentPage - 1 %>"
