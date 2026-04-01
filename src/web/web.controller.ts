@@ -711,6 +711,7 @@ export class WebController {
         @Res() res: Response,
         @Param('id',ParseIntPipe) id:number
     ) {
+        console.log(id)
         await this.profileService.remove(id);
         return res.redirect('/admin')
     }

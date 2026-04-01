@@ -51,9 +51,8 @@ export class ProfilesService {
   }
 
   async remove(id: number) {
-    const user = await this.userService.findOne(id);
-    if (!user) throw new NotFoundException('User not found !');
-    const Profile = await this.profileRepo.findOne({ where: { user: { id } } });
+    
+    const Profile = await this.profileRepo.findOne({ where:{id}});
     if (!Profile) throw new NotFoundException('Profile Not Existes !');
 
     await this.profileRepo.softDelete(Profile.id)
