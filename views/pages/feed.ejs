@@ -87,6 +87,11 @@
           <a href="/posts/<%= post.id %>" class="btn btn-sm btn-outline">
             Read more
           </a>
+          <form action="/posts/<%= post.id %>/delete" method="POST">
+            <button type="submit" style="background:none; border:none; cursor:pointer;">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </form>
         </div>
       </article>
     <% }) %>

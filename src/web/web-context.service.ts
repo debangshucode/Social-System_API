@@ -21,6 +21,10 @@ const NAV: Omit<NavLink, 'active'>[] = [
     {
         href: '/search',
         label: 'Search'
+    },
+    {
+        href: '/admin',
+        label: 'Admin'
     }
 ]
 

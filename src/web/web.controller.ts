@@ -189,6 +189,29 @@ export class WebController {
         res.redirect('/feed')
     }
 
+    // *---- Delete Post
+
+    @Post('/posts/:id/delete')
+    @UseGuards(webAuthGuard)
+    async removePost(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        const user = (req as any).user;
+        const profile = await this.profileService.findByUserId(user.sub);
+        if (!profile) throw new NotFoundException('profile not found');
+
+        try{
+            await this.postsService.remove(id,profile)
+        }
+        catch(err){
+            throw err;
+        }
+        return res.redirect('/feed')
+
+    }
+
 
     // * ----Profile
 
@@ -550,7 +573,7 @@ export class WebController {
                 reqCount: res.locals.reqCount,
                 nCount: res.locals.nCount,
                 nData: notification.data,
-                nMeta:notification.meta
+                nMeta: notification.meta
             }),
         );
 
