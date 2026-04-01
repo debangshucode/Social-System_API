@@ -54,7 +54,8 @@ body {
   color: #444;
   font-size: 0.9rem;
 }
-.navbar-user ,.notif-badge {
+.navbar-user,
+.notif-badge {
   font-size: 0.9rem;
   color: #666;
 }
@@ -411,6 +412,13 @@ body {
 }
 .profile-actions {
   margin-top: 1.25rem;
+}
+.profile-lock {
+  display: flex;
+  height: 50vh;
+  justify-content: center;
+  align-items: center;
+  color: #999;
 }
 
 /* ── Avatars ── */

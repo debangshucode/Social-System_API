@@ -72,6 +72,7 @@
          </div>
     </div>
 
+    <% if (isFollowing) { %>
     <div class="profile-posts">
 
         <% data.forEach(function(post) { %>
@@ -131,8 +132,13 @@
 
         <% }) %>
     </div>
+    <% }else { %>
+      <div class="profile-lock">
+          Profile Locked
+      </div>
+    <% } %>
   
-    <% if (meta && meta.totalPages > 1) { %>
+    <% if (isFollowing && meta && meta.totalPages > 1) { %>
       <div class="pagination">
         <% if (meta.currentPage > 1) { %>
           <a href="/profile/<%= profileID%>?page=<%= meta.currentPage - 1 %>"
@@ -154,14 +160,25 @@
   modalId: 'followersModal',
   title: 'Followers',
   items: fData,
-  userKey: 'follower'
+  meta:fMeta,
+  userKey: 'follower',
+  basePath: `/profile/${profileID}`,
+  pageParam: 'followersPage',
+  otherPageParam: 'followingPage',
+  otherCurrentPage: flMeta?.currentPage || 1
 }) %>
 
 <%- include('../partials/follow-list-modal', {
   modalId: 'followingModal',
   title: 'Following',
   items: flData,
-  userKey: 'following'
+  userKey: 'following',
+  meta:flMeta,
+  userKey: 'following',
+  basePath: `/profile/${profileID}`,
+  pageParam: 'followersPage',
+  otherPageParam: 'followingPage',
+  otherCurrentPage: flMeta?.currentPage || 1
 }) %>
 
 
@@ -191,4 +208,12 @@
   });
 </script>
 
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const openModalId = params.get('openModal');
+  if (openModalId) {
+    const modal = document.getElementById(openModalId);
+    if (modal) modal.hidden = false;
+  }
+</script>
 
