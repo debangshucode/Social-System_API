@@ -642,7 +642,7 @@ export class WebController {
             return res.redirect(`/posts/${req.body.postId}`)
         }
         else{
-            return res.redirect(`/profile/${req.body.profileId}`)
+            return res.redirect(`/requests`)
         }
     }
 
