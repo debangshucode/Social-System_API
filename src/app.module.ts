@@ -17,6 +17,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { WebModule } from './web/web.module';
 import { RefreshTokenMiddleware } from './web/middlewares/refresh-token.middleware';
 import { FollowModule } from './follow/follow.module';
+import { NotificationModule } from './notification/notification.module';
 
 
 
@@ -67,7 +68,7 @@ import { FollowModule } from './follow/follow.module';
       }),
     }),
 
-    WebModule, UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule, AvatarModule, FollowModule],
+    WebModule, UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule, AvatarModule, FollowModule, NotificationModule],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_PIPE,

@@ -1,5 +1,6 @@
 import { Comment } from "src/comments/entities/comment.entity";
 import { Like } from "src/likes/entities/like.entity";
+import { Notification } from "src/notification/entities/notification.entity";
 import { Profile } from "src/profiles/entities/profile.entity";
 import { Column, UpdateDateColumn, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, JoinColumn } from "typeorm";
 
@@ -45,6 +46,8 @@ export class Post {
     @DeleteDateColumn()
     deleted_at: Date;
 
+
+
     @ManyToOne(() => Profile, (profile) => profile.posts)
     @JoinColumn({ name: 'profile_id' })
     profile: Profile;
@@ -54,6 +57,9 @@ export class Post {
 
     @OneToMany(() => Like, (likes) => likes.post)
     likes: Like[];
+
+    @OneToMany(()=> Notification,(notification)=>notification.post)
+    notification: Notification[];
 
     // virtual 
     likes_count?: number;      // runtime only ✔
