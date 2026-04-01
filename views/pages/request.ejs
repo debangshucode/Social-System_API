@@ -35,7 +35,7 @@
                         <div class="actions">
                             <!-- accept  -->
                             <form method="POST" action="/request/accept/<%= followReq.id %>">
-                                <button type="submit" class="btn btn-primary btn-sm">
+                                <button type="submit" class="btn btn-green btn-sm">
                                   Accept
                                 </button>
             
@@ -43,7 +43,7 @@
 
                             <!-- Reject -->
                             <form method="POST" action="/request/reject/<%= followReq.id %>">
-                               <button type="submit" class="btn btn-primary btn-sm">
+                               <button type="submit" class="btn btn-danger btn-sm">
                                  Reject
                                </button>
                             </form>
@@ -53,5 +53,21 @@
                 </a>
         <% }) %>
       </ul>
+      <% if (fMeta && fMeta.totalPages > 1) { %>
+        <div class="pagination">
+            <% if (fMeta.currentPage > 1) { %>
+            <a href="/requests?page=<%= fMeta.currentPage - 1 %>" class="btn btn-sm btn-outline">&larr; Prev</a>
+            <% } %>
+
+            <span class="page-info">
+            Page <%= fMeta.currentPage %> of <%= fMeta.totalPages %>
+            </span>
+
+            <% if (fMeta.currentPage < fMeta.totalPages) { %>
+            <a href="/requests?page=<%= fMeta.currentPage + 1 %>" class="btn btn-sm btn-outline">Next &rarr;</a>
+            <% } %>
+        </div>
+    <% } %>
+
     </div>
 </div>

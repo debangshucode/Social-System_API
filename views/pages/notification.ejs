@@ -18,7 +18,7 @@
                         <%= notification.type[0].toUpperCase() + notification.type.slice(1).toLowerCase() %> Notification
                         </p>
 
-                        <div class="users-data">
+                        <div class="users-data" style="width: 100%;">
                         <div class="user-card-avatar">
                             <% if (notification.sender.avatar_url) { %>
                             <img src="<%= notification.sender.avatar_url %>" class="avatar-sm" />
@@ -32,7 +32,7 @@
                         <div class="notification-msg">
                             <span class="user-card-name"><%= notification.sender.user_name %></span>
                             <% if (notification.message) { %>
-                            <span class="user-card-bio"><%= notification.message %></span>
+                            <span class="user-card-bio"><%= notification.message %></span> <span class="user-card-name"><%= notification.post.content %></span>
                             <% } %>
                         </div>
                         </div>
@@ -79,5 +79,22 @@
 
         <% }) %>
       </ul>
+
+      <% if (nMeta && nMeta.totalPages > 1) { %>
+        <div class="pagination">
+            <% if (nMeta.currentPage > 1) { %>
+            <a href="/notification?page=<%= nMeta.currentPage - 1 %>" class="btn btn-sm btn-outline">&larr; Prev</a>
+            <% } %>
+
+            <span class="page-info">
+            Page <%= nMeta.currentPage %> of <%= nMeta.totalPages %>
+            </span>
+
+            <% if (nMeta.currentPage < nMeta.totalPages) { %>
+            <a href="/notification?page=<%= nMeta.currentPage + 1 %>" class="btn btn-sm btn-outline">Next &rarr;</a>
+            <% } %>
+        </div>
+    <% } %>
+
     </div>
 </div>

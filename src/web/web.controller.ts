@@ -382,7 +382,7 @@ export class WebController {
         if (!profile) throw new NotFoundException('profile not found');
         try {
             await this.likesService.create(profile.id, id)
-            const message = `${profile.user_name} has liked your post`
+            const message = ` has liked your post`
             await this.notificationService.create(postOwner, profile.id, notification_type.LIKE, message, id);
         }
         catch { }
@@ -428,7 +428,7 @@ export class WebController {
         if (!profile) throw new NotFoundException('Profile not found');
         try {
             await this.commentsService.create(profile.id, id, { content: body.content });
-            const message = `${profile.user_name} has commented ${body.content}to your post`
+            const message = `has commented ${body.content}to your post`
             await this.notificationService.create(postOwner, profile.id, notification_type.COMMENT, message, id);
         } catch { }
         res.redirect(`/posts/${id}`);
@@ -552,7 +552,8 @@ export class WebController {
                 fData: follower.data,
                 reqCount: res.locals.reqCount,
                 nCount: res.locals.nCount,
-                nData: notification.data
+                nData: notification.data,
+                nMeta:notification.meta
             }),
         );
 

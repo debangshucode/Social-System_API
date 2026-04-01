@@ -197,6 +197,18 @@ body {
   color: #fff;
   border-color: #534ab7;
 }
+.btn-green {
+  background: #53d006;
+  color: #fff;
+  border-color: #53d006;
+}
+
+.btn-green:hover{
+  background: #50c508;
+  border-color: #50c508;
+  transform: translateY(2px);;
+}
+
 .btn-primary:hover {
   background: #3c3489;
   border-color: #3c3489;
@@ -663,6 +675,11 @@ a {
 .btn-danger {
   background-color: #c92934;
   color: white;
+}
+.btn-danger:hover{
+  background: #b81d27;
+  border-color: #b81d27;
+  transform: translateY(2px);;
 }
 
 .stat-btn {

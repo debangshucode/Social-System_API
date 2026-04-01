@@ -35,7 +35,8 @@ export class NotificationService {
 
         return paginate(query, db, {
             sortableColumns: ['created_at'],
-            defaultSortBy: [['created_at', 'DESC']]
+            defaultSortBy: [['created_at', 'DESC']],
+            defaultLimit:2
         })
     }
 
