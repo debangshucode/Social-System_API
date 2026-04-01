@@ -2,7 +2,7 @@ import { Post } from "src/posts/entities/post.entity";
 import { Profile } from "src/profiles/entities/profile.entity";
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
-export enum notificaion_type {
+export enum notification_type {
     LIKE = 'LIKE',
     COMMENT = 'COMMENT',
     FOLLOW_REQ = 'FOLLOW_REQ',
@@ -34,9 +34,9 @@ export class Notification {
 
     @Column({
         type:'enum',
-        enum:notificaion_type,
+        enum:notification_type,
     })
-    type: notificaion_type
+    type: notification_type
 
     @Column({
         default: false
@@ -52,6 +52,8 @@ export class Notification {
     @DeleteDateColumn()
     deleted_at: Date;
 
+
+    // & FKs
 
     @ManyToOne(()=>Profile,(profile)=>profile.receivedNotifications)
     @JoinColumn({name:'receiver_id'})
