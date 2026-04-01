@@ -632,18 +632,22 @@ export class WebController {
     @UseGuards(webAuthGuard)
     @UseInterceptors(WebCountsInterceptor)
     async readNotifications(
-        @Req() req:Request,
-        @Res() res:Response,
-        @Param('id',ParseIntPipe) id:number
-    ){
+        @Req() req: Request,
+        @Res() res: Response,
+        @Param('id', ParseIntPipe) id: number
+    ) {
         await this.notificationService.readNotification(id)
 
-        if(req.body.postId){
-            return res.redirect(`/posts/${req.body.postId}`)
+        if (req.body.profileId && req.body.notificationType === notification_type.FOLLOW_ACP) {
+            return res.redirect(`/profile/${req.body.profileId}`)
         }
-        else{
+        else if (req.body.profileId && req.body.notificationType === notification_type.FOLLOW_REQ) {
             return res.redirect(`/requests`)
         }
+        else {
+            return res.redirect(`/posts/${req.body.postId}`)
+        }
+
     }
 
 }
