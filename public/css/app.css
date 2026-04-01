@@ -735,7 +735,7 @@ a {
 .notification-page .user-card {
   display: flex;
   justify-content: space-between;
-  flex-wrap: wrap
+  flex-wrap: wrap;
 }
 
 .notification-page .user-card .users-data {
@@ -749,27 +749,31 @@ a {
   width: 40%;
   display: flex;
   align-items: center;
-  gap: 10px; 
+  gap: 10px;
   justify-content: flex-end;
 }
-.notifications{
+.notifications {
   margin-top: 40px;
 }
 
-.notification-page .user-list *{
+.notification-page .user-list * {
   font-size: large;
 }
-.post-media{
+.post-media {
   margin-top: 15px;
 }
 
-#editForm{
+#editForm {
   width: 100%;
-
 }
 
-.edit-profile{
+.edit-profile {
   width: 100%;
   display: flex;
-  justify-content:center ;
+  justify-content: center;
+}
+
+.notification-msg {
+  display: flex;
+  gap: 5px;
 }

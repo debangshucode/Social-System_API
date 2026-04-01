@@ -4,10 +4,8 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { media_type, Post } from './entities/post.entity';
-import { object } from 'joi';
 import { Profile } from 'src/profiles/entities/profile.entity';
 import { user_role } from 'src/users/entities/user.entity';
-import { profile } from 'console';
 import { FilterOperator, paginate, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
@@ -151,5 +149,13 @@ export class PostsService {
       },
       defaultLimit: 2
     })
+  }
+
+  async findProfileByPostId(postId:number){
+    const post = await this.postRepo.findOne({where:{id:postId},relations:{profile:true}});
+    if(!post) throw new NotFoundException('post not found')
+    const profileId = post.profile.id;
+
+    return profileId;
   }
 }

@@ -160,4 +160,11 @@ export class FollowService {
 
         return this.followRepo.softDelete(follow.id)
     }
+
+    async findFollowerByFollowId(followId:number){
+        const follow = await this.followRepo.findOne({where:{id:followId,status:follow_status.PENDING}});
+        if(!follow) throw new NotFoundException('no follow req found')
+        const reqProfileId = follow.follower_id;
+        return reqProfileId;
+    }
 }

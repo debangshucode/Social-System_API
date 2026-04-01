@@ -24,13 +24,13 @@ export class Notification {
     @Column({
         nullable:true
     })
-    post_id:number
+    post_id:number | null;
 
     @Column({
         nullable: true,
         type: "varchar",
     })
-    message: string;
+    message: string | null;
 
     @Column({
         type:'enum',
@@ -65,5 +65,5 @@ export class Notification {
 
     @ManyToOne(()=>Post,(post)=>post.notification, {nullable:true})
     @JoinColumn({name:'post_id'})
-    post:Post;
+    post:Post ;
 }

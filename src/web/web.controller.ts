@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, ParseIntPipe, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, NotFoundException, Param, ParseIntPipe, Post, Query, Redirect, Req, Res, UseGuards } from "@nestjs/common";
 import { webContextService } from "./web-context.service";
 import { PostsService } from "src/posts/posts.service";
 import { LikesService } from "src/likes/likes.service";
@@ -21,6 +21,9 @@ import { diskStorage } from "multer";
 import type { Express } from "express";
 import { extname } from "path";
 import { media_type } from "src/posts/entities/post.entity";
+import { NotificationService } from "src/notification/notification.service";
+import { notification_type } from "src/notification/entities/notification.entity";
+import { WebCountsInterceptor } from "./interceptors/web-counts.interceptor";
 
 
 
@@ -34,7 +37,8 @@ export class WebController {
         private readonly likesService: LikesService,
         private readonly commentsService: CommentsService,
         private readonly avatarService: AvatarService,
-        private readonly followService: FollowService
+        private readonly followService: FollowService,
+        private readonly notificationService: NotificationService,
     ) { }
 
     // & File upload helper functions
@@ -80,6 +84,7 @@ export class WebController {
     // * ----Feed Page
     @Get('/feed')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async feed(
         @Req() req: Request,
         @Res() res: Response,
@@ -92,9 +97,7 @@ export class WebController {
             reqCount = null;
             return res.redirect('/profile')
         }
-        else {
-            reqCount = await this.followService.countPending(profile.id);
-        }
+
         // const result = await this.postsService.findAll(query);
 
         const followingIds = await this.followService.findFollowingIds(profile.id);
@@ -107,7 +110,8 @@ export class WebController {
             posts: result.data,
             meta: result.meta,
             link: result.links,
-            reqCount
+            reqCount: res.locals.reqCount,
+            nCount: res.locals.nCount
         }))
     }
 
@@ -115,6 +119,7 @@ export class WebController {
     // * ----Post Detail Page
     @Get('/posts/:id')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async postDetail(
         @Req() req: Request,
         @Res() res: Response,
@@ -126,7 +131,6 @@ export class WebController {
         const post = await this.postsService.findOne(id);
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) return res.redirect('/profile')
-        const reqCount = await this.followService.countPending(profile.id);
 
         const postForView = {
             ...post,
@@ -141,7 +145,8 @@ export class WebController {
             comments: comments.data,
             commentsMeta: comments.meta,
             commentsLink: comments.links,
-            reqCount
+            reqCount: res.locals.reqCount,
+            nCount: res.locals.nCount
         }))
     }
 
@@ -150,6 +155,7 @@ export class WebController {
     // & with file upload
     @Post('/feed/post')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     @UseInterceptors(
         FileInterceptor('media', {
             storage: diskStorage({
@@ -188,13 +194,13 @@ export class WebController {
 
     @Get('/profile')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async ownProfile(
         @Req() req: Request,
         @Res() res: Response,
         @Paginate() query: PaginateQuery
     ) {
         const user = (req as any).user;
-        let reqCount: number | null;
         let hasProfile: boolean;
         const curUserProfile = await this.profileService.findByUserId(user.sub);
         if (!curUserProfile) {
@@ -203,7 +209,8 @@ export class WebController {
                 profile: null,
                 hasProfile: false,
                 isOwnProfile: true,
-                reqCount: 0,
+                reqCount: res.locals.reqCount,
+                nCount: res.locals.nCount,
                 data: [],
                 meta: null,
                 fData: [],
@@ -214,7 +221,6 @@ export class WebController {
         }
 
         else {
-            reqCount = await this.followService.countPending(curUserProfile.id);
             hasProfile = true;
         }
 
@@ -239,7 +245,8 @@ export class WebController {
                 curUserProfile,
                 hasProfile,
                 isOwnProfile: true,
-                reqCount
+                reqCount: res.locals.reqCount,
+                nCount: res.locals.nCount,
             }),
         );
     }
@@ -247,6 +254,7 @@ export class WebController {
     // * Create profile
     @Post('/profile/create')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async createProfile(@Req() req: Request, @Body() body: CreateProfileDto, @Res() res: Response) {
         const user = (req as any).user;
         let profile: Profile | null = null
@@ -263,6 +271,7 @@ export class WebController {
     // * Edit Profile
     @Post('/profile/edit')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async editProfile(@Req() req: Request, @Body() body: CreateProfileDto, @Res() res: Response) {
         const user = (req as any).user;
         let profile: Profile | null = null
@@ -280,19 +289,17 @@ export class WebController {
 
     @Get('/profile/:id')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async usersProfile(@Req() req: Request, @Res() res: Response, @Paginate() query: PaginateQuery, @Param('id', ParseIntPipe) profileID: number) {
         const user = (req as any).user;
-        let reqCount;
+
         const profile = await this.profileService.findByProfileId(profileID);
         const curUserProfile = await this.profileService.findByUserId(user.sub);
 
         if (!curUserProfile) {
-            reqCount = null;
             return res.redirect('/profile')
         }
-        else {
-            reqCount = await this.followService.countPending(curUserProfile.id);
-        }
+
 
         const posts = await this.postsService.findPostByUser(profileID, query);
         const follower = await this.followService.findAll(query, profileID);
@@ -319,7 +326,8 @@ export class WebController {
                 flMeta: following.meta,
                 flData: following.data,
                 isFollowing,
-                reqCount
+                reqCount: res.locals.reqCount,
+                nCount: res.locals.nCount,
             }));
         }
     }
@@ -328,6 +336,7 @@ export class WebController {
 
     @Post('/profile/avatar')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async updateAvatar(@Req() req: Request, @Res() res: Response, @Body() body: UpdateAvatarDto) {
         const user = (req as any).user;
         try {
@@ -344,6 +353,7 @@ export class WebController {
     // * remove avatar
     @Post('/profile/avatar/remove')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async deleteAvatar(@Req() req: Request, @Res() res: Response) {
         const user = (req as any).user;
         try {
@@ -360,6 +370,7 @@ export class WebController {
     // * ----Like 
     @Post('/posts/:id/like')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async like(
         @Req() req: Request,
         @Res() res: Response,
@@ -367,9 +378,12 @@ export class WebController {
     ) {
         const user = (req as any).user;
         const profile = await this.profileService.findByUserId(user.sub);
+        const postOwner = await this.postsService.findProfileByPostId(id);
         if (!profile) throw new NotFoundException('profile not found');
         try {
             await this.likesService.create(profile.id, id)
+            const message = `${profile.user_name} has liked your post`
+            await this.notificationService.create(postOwner, profile.id, notification_type.LIKE, message, id);
         }
         catch { }
         res.redirect(`/posts/${id}`);
@@ -410,9 +424,12 @@ export class WebController {
     ) {
         const user = (req as any).user;
         const profile = await this.profileService.findByUserId(user.sub);
+        const postOwner = await this.postsService.findProfileByPostId(id);
         if (!profile) throw new NotFoundException('Profile not found');
         try {
             await this.commentsService.create(profile.id, id, { content: body.content });
+            const message = `${profile.user_name} has commented ${body.content}to your post`
+            await this.notificationService.create(postOwner, profile.id, notification_type.COMMENT, message, id);
         } catch { }
         res.redirect(`/posts/${id}`);
     }
@@ -422,18 +439,17 @@ export class WebController {
 
     @Get('/search')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async searchUSers(@Req() req: Request, @Res() res: Response, @Query('userName') userName: string, @Paginate() query: PaginateQuery) {
         const user = (req as any).user;
         const profiles = await this.profileService.findByUserName(userName, query);
         const allProfile = await this.profileService.findAll(query);
-        let reqCount: number | null;
+
         const curUserProfile = await this.profileService.findByUserId(user.sub);
         if (!curUserProfile) {
-            reqCount = null;
+            return Redirect('/profile')
         }
-        else {
-            reqCount = await this.followService.countPending(curUserProfile.id);
-        }
+
 
         res.render('pages/search', this.contextService.build('/search', user, {
             title: 'Search users',
@@ -442,7 +458,8 @@ export class WebController {
             userName,
             data: allProfile.data,
             allMeta: allProfile.meta,
-            reqCount
+            reqCount: res.locals.reqCount,
+            nCount: res.locals.nCount,
         }));
     }
 
@@ -459,6 +476,10 @@ export class WebController {
         if (!profile) throw new NotFoundException('profile not found');
         try {
             await this.followService.create(profile.id, id)
+
+            const message = 'send you follow request'
+
+            await this.notificationService.create(id, profile.id, notification_type.FOLLOW_REQ, message)
         }
         catch { }
         res.redirect(`/profile/${id}`);
@@ -505,9 +526,10 @@ export class WebController {
     // }
 
 
-    // * follow req notifications 
+    // * All notifications 
     @Get('/notification')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async notification(
         @Req() req: Request,
         @Res() res: Response,
@@ -517,7 +539,9 @@ export class WebController {
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) return res.redirect('/profile');
         const follower = await this.followService.findPending(query, profile.id);
-        const reqCount = await this.followService.countPending(profile.id);
+
+        const notification = await this.notificationService.getAllUnread(profile.id, query)
+        console.log(notification.data)
         res.render(
             'pages/notification',
             this.contextService.build('/notification', user, {
@@ -526,36 +550,100 @@ export class WebController {
                 id: profile.id,
                 fMeta: follower.meta,
                 fData: follower.data,
-                reqCount
+                reqCount: res.locals.reqCount,
+                nCount: res.locals.nCount,
+                nData: notification.data
             }),
         );
 
     }
 
+    @Get('/requests')
+    @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
+    async requests(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Paginate() query: PaginateQuery
+    ) {
+        const user = (req as any).user;
+        const profile = await this.profileService.findByUserId(user.sub);
+        if (!profile) return res.redirect('/profile');
+        const follower = await this.followService.findPending(query, profile.id);
+        res.render(
+            'pages/request',
+            this.contextService.build('/requests', user, {
+                title: 'Requests',
+                profile: profile.user_name,
+                id: profile.id,
+                fMeta: follower.meta,
+                fData: follower.data,
+                reqCount: res.locals.reqCount,
+                nCount: res.locals.nCount,
+            }),
+        );
+
+    }
 
     // *Accept follow req
 
     @Post('/request/accept/:id')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async acceptReq(
+        @Req() req: Request,
         @Res() res: Response,
         @Param('id', ParseIntPipe) followId: number
     ) {
+
+        const user = (req as any).user;
+
+        const userProfile = await this.profileService.findByUserId(user.sub)
+        if (!userProfile) return res.redirect('/profile')
+
+        const followerId = await this.followService.findFollowerByFollowId(followId);
+
         await this.followService.acceptFollow(followId);
 
-        res.redirect(`/notification`);
+        const message = `${userProfile.user_name} has accepted your request`;
+
+        await this.notificationService.create(followerId, userProfile.id, notification_type.FOLLOW_ACP, message);
+
+        res.redirect(`/requests`);
     }
+
+    // *reject follow req
 
     @Post('/request/reject/:id')
     @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
     async rejectReq(
         @Res() res: Response,
         @Param('id', ParseIntPipe) followId: number
     ) {
         await this.followService.rejectFollow(followId);
 
-        res.redirect(`/notification`);
+        res.redirect(`/requests`);
     }
 
+
+    // * Read notification
+    @Post('/notification/:id/read')
+    @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
+    async readNotifications(
+        @Req() req:Request,
+        @Res() res:Response,
+        @Param('id',ParseIntPipe) id:number
+    ){
+        await this.notificationService.readNotification(id)
+
+        if(req.body.postId){
+            return res.redirect(`/posts/${req.body.postId}`)
+        }
+        else{
+            return res.redirect(`/profile/${req.body.profileId}`)
+        }
+    }
 
 }

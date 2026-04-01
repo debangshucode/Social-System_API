@@ -12,6 +12,8 @@ import { webAuthGuard } from "./guards/web-auth.guard";
 import { RefreshTokenMiddleware } from "./middlewares/refresh-token.middleware";
 import { AvatarModule } from "src/avatar/avatar.module";
 import { FollowModule } from "src/follow/follow.module";
+import { NotificationModule } from "src/notification/notification.module";
+import { WebCountsInterceptor } from "./interceptors/web-counts.interceptor";
 
 
 
@@ -24,11 +26,12 @@ import { FollowModule } from "src/follow/follow.module";
         LikesModule,
         AvatarModule,
         FollowModule,
+        NotificationModule,
         JwtModule
     ],
 
     controllers:[WebController,WebAuthController],
-    providers:[webContextService,webAuthGuard,RefreshTokenMiddleware],
+    providers:[webContextService,webAuthGuard,RefreshTokenMiddleware,WebCountsInterceptor],
     exports:[RefreshTokenMiddleware]
 })
 
