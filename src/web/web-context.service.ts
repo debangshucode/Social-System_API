@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { user_role } from "src/users/entities/user.entity";
 export interface NavLink {
     href: string;
     label: string;
@@ -35,12 +36,27 @@ export class webContextService {
         user: any | null,
         extra: Record<string, unknown> = {},
     ): Record<string, unknown> {
-        return {
-            user,
-            navLinks: NAV.map(x => ({ ...x, active: x.href === currentPath })),
-            error: null,
-            title: 'App',
-            ...extra,
-        };
+
+        const userNav = NAV.filter(x => x.label !== 'Admin');
+        if (user && user.role === user_role.ADMIN) {
+            return {
+                user,
+                navLinks: NAV.map(x => ({ ...x, active: x.href === currentPath })),
+                error: null,
+                title: 'App',
+                ...extra,
+            };
+        }
+        else {
+            return {
+                user,
+                navLinks: userNav.map(x => ({ ...x, active: x.href === currentPath })),
+                error: null,
+                title: 'App',
+                ...extra,
+            };
+        }
+
+
     }
 }

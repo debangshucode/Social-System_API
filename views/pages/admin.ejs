@@ -1,0 +1,68 @@
+<div class="admin-page">
+  <div class="feed-header">
+    <h1>Admin Panel</h1>
+  </div>
+
+  <div class="post-card" style="margin-bottom:1rem">
+    <div class="post-card-meta">
+      <span class="post-author">Profiles</span>
+      <span class="post-time">Mock View</span>
+    </div>
+    <p class="post-excerpt">
+      Manage profile activation status. Deactivated profiles are shown in gray.
+    </p>
+  </div>
+
+  <% if (!data || data.length === 0) { %>
+    <p class="empty">No profiles found.</p>
+  <% } else { %>
+    <div class="post-list">
+      <% data.forEach(function(profile) { %>
+        <article class="post-card" style="<%= profile.deleted_at === null ? '' : 'opacity:.55;filter:grayscale(1)' %>">
+          <div class="post-card-meta">
+            <% if (profile.avatar_url) { %>
+              <img src="<%= profile.avatar_url %>" class="avatar-sm" alt="Profile avatar" />
+            <% } else { %>
+              <div class="avatar-sm avatar-placeholder">
+                <%= (profile.user_name || 'U').charAt(0).toUpperCase() %>
+              </div>
+            <% } %>
+
+            <span class="post-author"><%= profile.user_name %></span>
+            <span class="post-time"><%= profile.deleted_at === null ? 'Active' : 'Deactivated' %></span>
+          </div>
+
+          <p class="post-excerpt"><%= profile.bio || 'No bio added.' %></p>
+
+          <div class="post-card-footer">
+            <% if (profile.deleted_at === null ) { %>
+              <form method="POST" action="/admin/profiles/<%= profile.id %>/deactivate">
+                <button type="submit" class="btn btn-danger btn-sm">Deactivate</button>
+              </form>
+            <% } else { %>
+              <form method="POST" action="/admin/profiles/<%= profile.id %>/activate">
+                <button type="submit" class="btn btn-primary btn-sm">Activate</button>
+              </form>
+            <% } %>
+          </div>
+        </article>
+      <% }); %>
+    </div>
+
+    <% if (meta && meta.totalPages > 1) { %>
+      <div class="pagination">
+        <% if (meta.currentPage > 1) { %>
+          <a href="/admin?page=<%= meta.currentPage - 1 %>" class="btn btn-sm btn-outline">&larr; Prev</a>
+        <% } %>
+
+        <span class="page-info">
+          Page <%= meta.currentPage %> of <%= meta.totalPages %>
+        </span>
+
+        <% if (meta.currentPage < meta.totalPages) { %>
+          <a href="/admin?page=<%= meta.currentPage + 1 %>" class="btn btn-sm btn-outline">Next &rarr;</a>
+        <% } %>
+      </div>
+    <% } %>
+  <% } %>
+</div>

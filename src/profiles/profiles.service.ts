@@ -117,4 +117,16 @@ export class ProfilesService {
 
     return { avatar_url: data.avatar_url };
   }
+
+
+  findAllwithDeleted(query: PaginateQuery) {
+    return paginate(query, this.profileRepo, {
+      withDeleted:true,
+      relations: ['user'],
+      sortableColumns: ['id', 'created_at'],
+      searchableColumns: ['user_name'],
+      defaultSortBy: [['id', 'DESC']],
+      defaultLimit:5
+    })
+  }
 }

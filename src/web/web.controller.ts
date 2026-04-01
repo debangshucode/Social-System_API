@@ -24,6 +24,9 @@ import { media_type } from "src/posts/entities/post.entity";
 import { NotificationService } from "src/notification/notification.service";
 import { notification_type } from "src/notification/entities/notification.entity";
 import { WebCountsInterceptor } from "./interceptors/web-counts.interceptor";
+import { RoleGuard } from "src/auth/guards/roles.guard";
+import { Roles } from "src/auth/decorators/roles.decorator";
+import { user_role } from "src/users/entities/user.entity";
 
 
 
@@ -202,10 +205,10 @@ export class WebController {
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) throw new NotFoundException('profile not found');
 
-        try{
-            await this.postsService.remove(id,profile)
+        try {
+            await this.postsService.remove(id, profile)
         }
-        catch(err){
+        catch (err) {
             throw err;
         }
         return res.redirect('/feed')
@@ -672,4 +675,43 @@ export class WebController {
 
     }
 
+
+
+    // ! ADMIN 
+    @Get('/admin')
+    @UseGuards(webAuthGuard, RoleGuard)
+    @Roles(user_role.ADMIN)
+    @UseInterceptors(WebCountsInterceptor)
+    async adminPage(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Paginate() query: PaginateQuery
+    ) {
+        const user = (req as any).user ?? null;
+
+        const profiles = await this.profileService.findAllwithDeleted(query)
+
+        res.render('pages/admin', this.contextService.build(
+            '/admin',
+            user,
+            {
+                title: 'amin',
+                data: profiles.data,
+                meta: profiles.meta,
+            }
+        ));
+    }
+
+    // ! Delete Profile
+    @Post('/admin/profiles/:id/deactivate')
+    @UseGuards(webAuthGuard, RoleGuard)
+    @Roles(user_role.ADMIN)
+    async deactivateProfile(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Param('id',ParseIntPipe) id:number
+    ) {
+        await this.profileService.remove(id);
+        return res.redirect('/admin')
+    }
 }
