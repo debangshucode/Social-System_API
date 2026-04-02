@@ -138,9 +138,17 @@ export class PostsService {
       .leftJoinAndSelect('author.user', 'user')
       .loadRelationCountAndMap('post.likes_count', 'post.likes')
       .loadRelationCountAndMap('post.comments_count', 'post.comments')
-      .innerJoin('follows', 'f', 'f.following_Id = author.id AND f.follower_Id = :currentUserId', {
-        currentUserId
-      })
+      .leftJoin(
+        'follows',
+        'f',
+        'f.following_Id = author.id AND f.follower_Id = :currentUserId',
+        { currentUserId }
+      )
+      .where('f.status = :status', { status: 'ACCEPT' })
+      .andWhere('f.id IS NOT NULL OR author.id = :currentUserId', {
+        currentUserId,
+      });
+      
 
     return paginate(query, db, {
       sortableColumns: ['created_at'],
