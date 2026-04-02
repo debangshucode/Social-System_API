@@ -230,7 +230,8 @@ export class WebController {
     // * ----Profile
 
     @Get('/profile')
-    @UseGuards(webAuthGuard)
+    @UseGuards(webAuthGuard,RoleGuard)
+    @Roles( user_role.USER)
     @UseInterceptors(WebCountsInterceptor)
     async ownProfile(
         @Req() req: Request,
@@ -480,7 +481,8 @@ export class WebController {
     // * ---- Search
 
     @Get('/search')
-    @UseGuards(webAuthGuard)
+    @UseGuards(webAuthGuard,RoleGuard)
+    @Roles( user_role.USER)
     @UseInterceptors(WebCountsInterceptor)
     async searchUSers(@Req() req: Request, @Res() res: Response, @Query('userName') userName: string, @Paginate() query: PaginateQuery) {
         const user = (req as any).user;
@@ -752,7 +754,8 @@ export class WebController {
 
     // chat page
     @Get('/chat')
-    @UseGuards(webAuthGuard)
+    @UseGuards(webAuthGuard,RoleGuard)
+    @Roles( user_role.USER)
     @UseInterceptors(WebCountsInterceptor)
     async chatPage(
         @Req() req: Request,
@@ -774,7 +777,8 @@ export class WebController {
     }
 
     @Get('/chat/:id')
-    @UseGuards(webAuthGuard)
+    @UseGuards(webAuthGuard,RoleGuard)
+    @Roles( user_role.USER)
     async chat(
         @Req() req: Request,
         @Res() res: Response,

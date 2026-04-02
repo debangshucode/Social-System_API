@@ -22,7 +22,7 @@ export class RoleGuard implements CanActivate {
         const user = request.user as { role?: user_role };
 
         if (!requriedRoles.includes(user.role as user_role)) {
-            throw new ForbiddenException('Only admins can access this route');
+            throw new ForbiddenException(`Only ${requriedRoles} can access this route`);
         }
         return true;
     }

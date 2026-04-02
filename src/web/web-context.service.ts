@@ -27,6 +27,12 @@ const NAV: Omit<NavLink, 'active'>[] = [
         href: '/chat',
         label: 'Chat'
     },
+]
+const adminNav:Omit<NavLink, 'active'>[] = [
+    {
+        href: '/feed',
+        label: 'Feed'
+    },
     {
         href: '/admin',
         label: 'Admin'
@@ -41,11 +47,10 @@ export class webContextService {
         extra: Record<string, unknown> = {},
     ): Record<string, unknown> {
 
-        const userNav = NAV.filter(x => x.label !== 'Admin');
         if (user && user.role === user_role.ADMIN) {
             return {
                 user,
-                navLinks: NAV.map(x => ({ ...x, active: x.href === currentPath })),
+                navLinks: adminNav.map(x => ({ ...x, active: x.href === currentPath })),
                 error: null,
                 title: 'App',
                 ...extra,
@@ -54,7 +59,7 @@ export class webContextService {
         else {
             return {
                 user,
-                navLinks: userNav.map(x => ({ ...x, active: x.href === currentPath })),
+                navLinks: NAV.map(x => ({ ...x, active: x.href === currentPath })),
                 error: null,
                 title: 'App',
                 ...extra,
