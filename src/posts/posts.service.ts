@@ -26,6 +26,23 @@ export class PostsService {
     return post;
   }
 
+  private formatTimeAgo(date: Date): string {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const remainingMinutes = diffMinutes % 60;
+
+    if (diffMinutes < 1) return 'just now';
+    if (diffMinutes < 60) return `${diffMinutes} min ago`;
+    if(diffHours < 24) return `${diffHours} hr ago ${remainingMinutes} min ago`;
+    if(diffDays >= 1) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+
+    return `${diffHours} hr ${remainingMinutes} min ago`;
+  }
+
 
   async create(id: number, createPostDto: CreatePostDto,
     media?: {
@@ -51,7 +68,7 @@ export class PostsService {
       .loadRelationCountAndMap('post.likes_count', 'post.likes')
       .loadRelationCountAndMap('post.comments_count', 'post.comments')
 
-    return paginate(query, db, {
+    const result = await paginate(query, db, {
       sortableColumns: ['created_at'],
       defaultSortBy: [['created_at', 'DESC']],
       searchableColumns: ['content'],
@@ -60,6 +77,13 @@ export class PostsService {
       },
       defaultLimit: 2
     })
+
+    result.data = result.data.map((post) => ({
+      ...post,
+      timeAgo: this.formatTimeAgo(new Date(post.created_at + 'z')),
+    }));
+
+    return result;
   }
 
   async findOne(id: number) {
@@ -144,13 +168,13 @@ export class PostsService {
         'f.following_Id = author.id AND f.follower_Id = :currentUserId',
         { currentUserId }
       )
-      .where('f.status = :status', { status: 'ACCEPT' })
-      .andWhere('f.id IS NOT NULL OR author.id = :currentUserId', {
+      .where('(f.status = :status AND f.id IS NOT NULL) OR author.id = :currentUserId', {
+        status: 'ACCEPT',
         currentUserId,
       });
-      
 
-    return paginate(query, db, {
+
+    const result = await paginate(query, db, {
       sortableColumns: ['created_at'],
       defaultSortBy: [['created_at', 'DESC']],
       searchableColumns: ['content'],
@@ -159,6 +183,12 @@ export class PostsService {
       },
       defaultLimit: 2
     })
+    result.data = result.data.map((post) => ({
+      ...post,
+      timeAgo: this.formatTimeAgo(new Date(post.created_at + 'z')),
+    }));
+
+    return result;
   }
 
   async findProfileByPostId(postId: number) {

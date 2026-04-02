@@ -94,38 +94,29 @@ export class WebController {
         @Paginate() query: PaginateQuery,
     ) {
         const user = (req as any).user;
-        let reqCount: null | number;
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) {
-            reqCount = null;
             return res.redirect('/profile')
         }
-
+        let result;
         if (user.role === user_role.ADMIN) {
-            const result = await this.postsService.findAll(query);
+            result = await this.postsService.findAll(query);
 
-            return res.render('pages/feed', this.contextService.build('/feed', user, {
-                posts: result.data,
-                meta: result.meta,
-                link: result.links,
-                reqCount: res.locals.reqCount,
-                nCount: res.locals.nCount
-            }))
         } else {
             const followingIds = await this.followService.findFollowingIds(profile.id);
 
             const ids = [profile.id, ...followingIds];
 
-            const result = await this.postsService.findPostsByFollowing(query, profile.id);
+            result = await this.postsService.findPostsByFollowing(query, profile.id);
 
-            return res.render('pages/feed', this.contextService.build('/feed', user, {
+        }
+        return res.render('pages/feed', this.contextService.build('/feed', user, {
                 posts: result.data,
                 meta: result.meta,
                 link: result.links,
                 reqCount: res.locals.reqCount,
                 nCount: res.locals.nCount
             }))
-        }
 
 
     }

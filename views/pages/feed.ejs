@@ -57,6 +57,9 @@
           <time class="post-time">
             <%= new Date(post.created_at).toLocaleDateString() %>
           </time>
+          <time class="post-time" style="margin-left:8px;color:#888;font-size:.82rem">
+            (<%= post.timeAgo %>)
+          </time>
         </div>
 
         <p class="post-excerpt">
