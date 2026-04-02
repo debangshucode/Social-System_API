@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { user_role } from 'src/users/entities/user.entity';
+import { ProfilesService } from 'src/profiles/profiles.service';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,8 @@ export class AuthService {
   constructor(
     private userService:UsersService,
     private jwtService:JwtService,
-    private configService:ConfigService
+    private configService:ConfigService,
+    private profileService:ProfilesService
   ){}
 
   async register(registerDto:RegisterDto){
@@ -32,6 +34,8 @@ export class AuthService {
   async login(login:LoginDto){
     const user = await this.userService.findByMail(login.email)
     if(!user) throw new UnauthorizedException('Invalid Credientials');
+    const profile = await this.profileService.findByUserIdWithDelete(user.id);
+    if(profile?.deleted_at !== null) throw new UnauthorizedException('You have been deactivated by the admin, Contact Admin for the access')
     const password = await bcrypt.compare(login.password,user.password);
     if(!password) throw new UnauthorizedException('Invalid Credientials');
 

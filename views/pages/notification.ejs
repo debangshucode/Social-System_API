@@ -18,21 +18,21 @@
                         <%= notification.type[0].toUpperCase() + notification.type.slice(1).toLowerCase() %> Notification
                         </p>
 
-                        <div class="users-data" style="width: 100%;">
+                        <div class="users-data" style="width: 100% ;">
                         <div class="user-card-avatar">
-                            <% if (notification.sender.avatar_url) { %>
+                            <% if (notification.sender?.avatar_url) { %>
                             <img src="<%= notification.sender.avatar_url %>" class="avatar-sm" />
                             <% } else { %>
                             <div class="avatar-sm avatar-placeholder">
-                                <%= notification.sender.user_name.charAt(0).toUpperCase() %>
+                                <%= (notification.sender?.user_name ?? 'U').charAt(0).toUpperCase() %>
                             </div>
                             <% } %>
                         </div>
 
-                        <div class="notification-msg">
-                            <span class="user-card-name"><%= notification.sender.user_name %></span>
+                        <div class="notification-msg" style="flex-direction: row;">
+                            <span class="user-card-name"><%= notification.sender?.user_name %></span>
                             <% if (notification.message) { %>
-                            <span class="user-card-bio"><%= notification.message %></span> <span class="user-card-name"><%= notification.post.content %></span>
+                            <span class="user-card-bio"><%= notification?.message %></span> <span class="user-card-bio" style="font-weight: 500;"><%= notification.post.content %></span>
                             <% } %>
                         </div>
                         </div>
@@ -45,13 +45,13 @@
                     <li class="user-card">
                         <form action="/notification/<%= notification.id %>/read" method="POST">
                             <input type="hidden" name="notificationType" value="<%= notification.type %>" />
-                            <input type="hidden" name="profileId" value="<%= notification.sender.id %>" />
+                            <input type="hidden" name="profileId" value="<%= notification.sender?.id %>" />
 
                             <button type="submit" style="all: unset; width: 100%; display: block; cursor: pointer;">
                                 <p style="width: 100%;">Follow request</p>
                                 <div class="users-data">
                                     <div class="user-card-avatar">
-                                        <% if (notification.sender.avatar_url) { %>
+                                        <% if (notification.sender?.avatar_url) { %>
                                             <img
                                                 src="<%= notification.sender.avatar_url %>"
                                                 alt="<%= notification.sender.user_name %>"
@@ -59,12 +59,12 @@
                                             />
                                         <% } else { %>
                                             <div class="avatar-sm avatar-placeholder">
-                                            <%= notification.sender.user_name.charAt(0).toUpperCase() %>
+                                            <%= (notification.sender?.user_name ?? 'U').charAt(0).toUpperCase() %>
                                             </div>
                                         <% } %>
                                     </div>
                                     <div class="notification-msg">
-                                        <span class="user-card-name"><%= notification.sender.user_name %></span>
+                                        <span class="user-card-name"><%= notification.sender?.user_name %></span>
                                         <% if (notification.message) { %>
                                             <span class="user-card-bio"><%= notification.message %></span>
                                         <% } %>

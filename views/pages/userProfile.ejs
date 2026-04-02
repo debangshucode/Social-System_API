@@ -6,7 +6,7 @@
        <div class="img-info">
              <!-- ^ image -->
         <div class="p-image">
-            <% if (profile.avatar_url) { %>
+            <% if (profile?.avatar_url) { %>
                 <img
                 src="<%= profile.avatar_url %>"
                 alt="<%= profile.user_name %>"
@@ -14,15 +14,15 @@
                 />
             <% } else { %>
                 <div class="avatar-xl avatar-placeholder">
-                    <%= profile.user_name.charAt(0).toUpperCase() %>
+                    <%= (profile?.user_name ?? 'U').charAt(0).toUpperCase() %>
                 </div>
             <% } %>
         </div>
 
         <!-- ^ name and bio -->
         <div class="p-info">
-            <h2><%= profile.user_name %></h2>
-            <p><%= profile.bio %>   </p>
+            <h2><%= profile?.user_name %></h2>
+            <p><%= profile?.bio %>   </p>
         </div>
 
 
@@ -78,9 +78,9 @@
          </div>
     </div>
 
-    <% if (followStatus === 'ACCEPT') { %>
+    <% if (followStatus === 'ACCEPT' || user.role === 'ADMIN') { %>
     <div class="profile-posts">
-
+      <% if(data.length > 0 ){ %>
         <% data.forEach(function(post) { %>
 
             <!-- !post card -->
@@ -135,8 +135,13 @@
             </div>
           </article>
 
-
         <% }) %>
+      <% } else{ %>
+        <div class="profile-lock">
+          Profile deleted
+        </div>
+      <% } %>
+
     </div>
     <% }else { %>
       <div class="profile-lock">
@@ -144,7 +149,7 @@
       </div>
     <% } %>
   
-    <% if (followStatus === 'ACCEPT' && meta && meta.totalPages > 1) { %>
+    <% if ((followStatus === 'ACCEPT' || user.role === 'ADMIN') && meta && meta.totalPages > 0) { %>
       <div class="pagination">
         <% if (meta.currentPage > 1) { %>
           <a href="/profile/<%= profileID%>?page=<%= meta.currentPage - 1 %>"

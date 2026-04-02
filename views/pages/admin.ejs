@@ -18,22 +18,31 @@
   <% } else { %>
     <div class="post-list">
       <% data.forEach(function(profile) { %>
-        <article class="post-card" style="<%= profile.deleted_at === null ? '' : 'opacity:.55;filter:grayscale(1)' %>">
-          <div class="post-card-meta">
-            <% if (profile.avatar_url) { %>
-              <img src="<%= profile.avatar_url %>" class="avatar-sm" alt="Profile avatar" />
-            <% } else { %>
-              <div class="avatar-sm avatar-placeholder">
-                <%= (profile.user_name || 'U').charAt(0).toUpperCase() %>
-              </div>
-            <% } %>
+        <article class="post-card" onclick="window.location.href=`profile/<%=profile.id %>`">
+  
+          <div class="post-card-body"
+              style="<%= profile.deleted_at === null ? '' : 'opacity:.55;filter:grayscale(1)' %>">
 
-            <span class="post-author"><%= profile.user_name %></span>
-            <span class="post-time"><%= profile.deleted_at === null ? 'Active' : 'Deactivated' %></span>
+            <div class="post-card-meta">
+              <% if (profile.avatar_url) { %>
+                <img src="<%= profile.avatar_url %>" class="avatar-sm" />
+              <% } else { %>
+                <div class="avatar-sm avatar-placeholder">
+                  <%= (profile.user_name || 'U').charAt(0).toUpperCase() %>
+                </div>
+              <% } %>
+
+              <span class="post-author"><%= profile.user_name %></span>
+              <span class="post-time">
+                <%= profile.deleted_at === null ? 'Active' : 'Deactivated' %>
+              </span>
+            </div>
+
+            <p class="post-excerpt"><%= profile.bio || 'No bio added.' %></p>
+
           </div>
 
-          <p class="post-excerpt"><%= profile.bio || 'No bio added.' %></p>
-
+          <!-- Button OUTSIDE faded area -->
           <div class="post-card-footer">
             <% if (profile.deleted_at === null ) { %>
               <form method="POST" action="/admin/profiles/<%= profile.id %>/deactivate">
@@ -45,6 +54,7 @@
               </form>
             <% } %>
           </div>
+
         </article>
       <% }); %>
     </div>

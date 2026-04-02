@@ -131,14 +131,16 @@ export class PostsService {
   }
 
 
-  async findPostsByFollowing(query: PaginateQuery,followingIds:number[]) {
+  async findPostsByFollowing(query: PaginateQuery, currentUserId: number) {
     const db = this.postRepo
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.profile', 'author')
       .leftJoinAndSelect('author.user', 'user')
       .loadRelationCountAndMap('post.likes_count', 'post.likes')
       .loadRelationCountAndMap('post.comments_count', 'post.comments')
-      .where('author.id IN (:...followingIds)', { followingIds })
+      .innerJoin('follows', 'f', 'f.following_Id = author.id AND f.follower_Id = :currentUserId', {
+        currentUserId
+      })
 
     return paginate(query, db, {
       sortableColumns: ['created_at'],
@@ -151,9 +153,9 @@ export class PostsService {
     })
   }
 
-  async findProfileByPostId(postId:number){
-    const post = await this.postRepo.findOne({where:{id:postId},relations:{profile:true}});
-    if(!post) throw new NotFoundException('post not found')
+  async findProfileByPostId(postId: number) {
+    const post = await this.postRepo.findOne({ where: { id: postId }, relations: { profile: true } });
+    if (!post) throw new NotFoundException('post not found')
     const profileId = post.profile.id;
 
     return profileId;

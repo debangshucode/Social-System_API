@@ -17,6 +17,9 @@ export class ProfilesService {
     const isProfile = await this.profileRepo.findOne({ where: { user: { id } } });
     if (isProfile) throw new BadRequestException('Profile Already Existes');
 
+    const profileName = await this.profileRepo.findOne({where:{user_name:createProfileDto.user_name}})
+    if(profileName) throw new BadRequestException('This user name is already taken')
+      
     const profile = this.profileRepo.create({ ...createProfileDto, user });
     return this.profileRepo.save(profile)
   }
@@ -61,9 +64,7 @@ export class ProfilesService {
   }
 
   async restore(id: number) {
-    const user = await this.userService.findOne(id);
-    if (!user) throw new NotFoundException('User not found !');
-    const Profile = await this.profileRepo.findOne({ where: { user: { id } }, withDeleted: true });
+    const Profile = await this.profileRepo.findOne({ where: {id}, withDeleted: true });
     if (!Profile) throw new NotFoundException('Profile Not Existes !');
 
     await this.profileRepo.restore(Profile.id)
@@ -80,6 +81,14 @@ export class ProfilesService {
     const profile = await this.profileRepo.findOne({
       where: { user: { id } },
       relations: { user: true }
+    });
+    return profile;
+  }
+  async findByUserIdWithDelete(id: number) {
+    const profile = await this.profileRepo.findOne({
+      where: { user: { id }},
+      relations: { user: true },
+      withDeleted:true
     });
     return profile;
   }

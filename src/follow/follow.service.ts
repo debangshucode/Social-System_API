@@ -60,6 +60,7 @@ export class FollowService {
             .where('follows.following_id = :targetId', { targetId })
             .andWhere('follows.deleted_at IS NULL')
             .andWhere('follows.status = :status', { status: follow_status.ACCEPT })
+            .andWhere('follower.id IS NOT NULL')
             .select([
                 'follows.id',
                 'follower.id',
@@ -82,6 +83,7 @@ export class FollowService {
             .where('follows.follower_id = :followerId', { followerId })
             .andWhere('follows.deleted_at IS NULL')
             .andWhere('follows.status = :status', { status: follow_status.ACCEPT })
+            .andWhere('following.id IS NOT NULL')
             .select([
                 'follows.id',
                 'following.id',
@@ -173,5 +175,20 @@ export class FollowService {
         if(!follow) throw new NotFoundException('no follow req found')
         const reqProfileId = follow.follower_id;
         return reqProfileId;
+    }
+
+
+    async canAccess(curPfId:number , ownerPfID:number){
+        if(curPfId === ownerPfID) return true 
+        
+        const follow = await this.followRepo.findOne({
+            where:{
+                follower_id:curPfId,
+                following_id:ownerPfID,
+                status:follow_status.ACCEPT,
+            }
+        })
+
+        return !!follow;
     }
 }

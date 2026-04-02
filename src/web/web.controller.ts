@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, ParseIntPipe, Post, Query, Redirect, Req, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, ParseIntPipe, Post, Query, Redirect, Req, Res, UseGuards } from "@nestjs/common";
 import { webContextService } from "./web-context.service";
 import { PostsService } from "src/posts/posts.service";
 import { LikesService } from "src/likes/likes.service";
@@ -101,21 +101,33 @@ export class WebController {
             return res.redirect('/profile')
         }
 
-        // const result = await this.postsService.findAll(query);
+        if (user.role === user_role.ADMIN) {
+            const result = await this.postsService.findAll(query);
 
-        const followingIds = await this.followService.findFollowingIds(profile.id);
+            return res.render('pages/feed', this.contextService.build('/feed', user, {
+                posts: result.data,
+                meta: result.meta,
+                link: result.links,
+                reqCount: res.locals.reqCount,
+                nCount: res.locals.nCount
+            }))
+        } else {
+            const followingIds = await this.followService.findFollowingIds(profile.id);
 
-        const ids = [profile.id, ...followingIds];
+            const ids = [profile.id, ...followingIds];
 
-        const result = await this.postsService.findPostsByFollowing(query, ids);
+            const result = await this.postsService.findPostsByFollowing(query, profile.id);
 
-        res.render('pages/feed', this.contextService.build('/feed', user, {
-            posts: result.data,
-            meta: result.meta,
-            link: result.links,
-            reqCount: res.locals.reqCount,
-            nCount: res.locals.nCount
-        }))
+            return res.render('pages/feed', this.contextService.build('/feed', user, {
+                posts: result.data,
+                meta: result.meta,
+                link: result.links,
+                reqCount: res.locals.reqCount,
+                nCount: res.locals.nCount
+            }))
+        }
+
+
     }
 
 
@@ -132,8 +144,16 @@ export class WebController {
         const user = (req as any).user;
 
         const post = await this.postsService.findOne(id);
+        
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) return res.redirect('/profile')
+
+        
+        const ownerProfileId = post.profile?.id
+        if(!ownerProfileId && user.role!==user_role.ADMIN) throw new ForbiddenException('This post is no longer availabe as the user has been deactivated')
+
+        const canAccess = await this.followService.canAccess(profile.id, ownerProfileId);
+        if (!canAccess && user.role!==user_role.ADMIN) throw new ForbiddenException('You must follow the user to view his post ')
 
         const postForView = {
             ...post,
@@ -335,6 +355,7 @@ export class WebController {
             curUserProfile.id,
             profileID
         );
+        console.log(posts.meta)
 
         if (profile?.id === curUserProfile.id) {
             res.redirect('/profile')
@@ -402,12 +423,15 @@ export class WebController {
     ) {
         const user = (req as any).user;
         const profile = await this.profileService.findByUserId(user.sub);
-        const postOwner = await this.postsService.findProfileByPostId(id);
+        const postOwnerId = await this.postsService.findProfileByPostId(id);
         if (!profile) throw new NotFoundException('profile not found');
+
+        const canAccess = await this.followService.canAccess(profile.id, postOwnerId);
+        if(!canAccess && user.role!==user_role.ADMIN) throw new ForbiddenException('Follow this user to commnet this post');
         try {
             await this.likesService.create(profile.id, id)
             const message = ` has liked your post`
-            await this.notificationService.create(postOwner, profile.id, notification_type.LIKE, message, id);
+            await this.notificationService.create(postOwnerId, profile.id, notification_type.LIKE, message, id);
         }
         catch { }
         res.redirect(`/posts/${id}`);
@@ -448,12 +472,15 @@ export class WebController {
     ) {
         const user = (req as any).user;
         const profile = await this.profileService.findByUserId(user.sub);
-        const postOwner = await this.postsService.findProfileByPostId(id);
+        const postOwnerId = await this.postsService.findProfileByPostId(id);
         if (!profile) throw new NotFoundException('Profile not found');
+
+        const canAccess = await this.followService.canAccess(profile.id, postOwnerId);
+        if(!canAccess && user.role!==user_role.ADMIN) throw new ForbiddenException('Follow this user to commnet this post');
         try {
             await this.commentsService.create(profile.id, id, { content: body.content });
             const message = `has commented ${body.content}to your post`
-            await this.notificationService.create(postOwner, profile.id, notification_type.COMMENT, message, id);
+            await this.notificationService.create(postOwnerId, profile.id, notification_type.COMMENT, message, id);
         } catch { }
         res.redirect(`/posts/${id}`);
     }
@@ -669,9 +696,10 @@ export class WebController {
         else if (req.body.profileId && req.body.notificationType === notification_type.FOLLOW_REQ) {
             return res.redirect(`/requests`)
         }
-        else {
+        else if(req.body.postId) {
             return res.redirect(`/posts/${req.body.postId}`)
         }
+        return res.redirect(`/notification`)
 
     }
 
@@ -709,10 +737,24 @@ export class WebController {
     async deactivateProfile(
         @Req() req: Request,
         @Res() res: Response,
-        @Param('id',ParseIntPipe) id:number
+        @Param('id', ParseIntPipe) id: number
     ) {
         console.log(id)
         await this.profileService.remove(id);
+        return res.redirect('/admin')
+    }
+
+    // ! Activate Profile
+    @Post('/admin/profiles/:id/activate')
+    @UseGuards(webAuthGuard, RoleGuard)
+    @Roles(user_role.ADMIN)
+    async activateProfile(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Param('id', ParseIntPipe) id: number
+    ) {
+        console.log(id)
+        await this.profileService.restore(id);
         return res.redirect('/admin')
     }
 }

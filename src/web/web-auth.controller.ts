@@ -45,11 +45,11 @@ export class WebAuthController {
       }
 
       res.redirect('/feed');
-    } catch {
+    } catch(err) {
       res.render('pages/login', {
         ...this.contextService.build('/login', null, { title: 'Login' }),
         layout: 'layouts/auth',
-        error: 'Invalid email or password.',
+        error: err.message,
       });
     }
   }

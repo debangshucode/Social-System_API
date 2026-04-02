@@ -7,10 +7,11 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { RoleGuard } from './guards/roles.guard';
+import { ProfilesModule } from 'src/profiles/profiles.module';
 
 
 @Module({
-  imports: [UsersModule,
+  imports: [UsersModule,ProfilesModule,
     PassportModule,
     JwtModule.register({})],
   controllers: [AuthController],

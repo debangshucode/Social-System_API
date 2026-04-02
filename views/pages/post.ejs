@@ -10,7 +10,7 @@
       </div>
     <% } %>
     <div>
-      <strong><%= post.profile.user_name ?? 'Unknown' %></strong>
+      <strong><%= post.profile?.user_name ?? 'Unknown' %></strong>
       <time><%= new Date(post.created_at).toLocaleDateString() %></time>
     </div>
   </div>
@@ -34,19 +34,25 @@
 
   <!-- Like / Unlike — works without JS, two separate forms -->
   <div class="post-actions">
-    <% if (post.liked_by_me) { %>
+    <% if ( post.profile && post.liked_by_me) { %>
       <form method="POST" action="/posts/<%= post.id %>/unlike">
         <button type="submit" class="btn btn-sm btn-liked">
           <i class="fa-solid fa-heart" style="margin-right: 2px;"></i> Unlike &nbsp;<span class="count"><%= post.likes_count ?? 0 %></span>
         </button>
       </form>
-    <% } else { %>
+    <% } else if(post.profile) { %>
       <form method="POST" action="/posts/<%= post.id %>/like">
-        <button type="submit" class="btn btn-sm btn-outline">
+        <button type="submit" class="btn btn-sm btn-outline" >
          <i class="fa-regular fa-heart" style="margin-right: 2px;"></i> Like &nbsp;<span class="count"><%= post.likes_count ?? 0 %></span>
         </button>
       </form>
-    <% } %>
+    <% }else { %>
+      <form >
+        <button type="submit" class="btn btn-sm btn-outline" disabled>
+         <i class="fa-regular fa-heart" style="margin-right: 2px;"></i> Like &nbsp;<span class="count"><%= post.likes_count ?? 0 %></span>
+        </button>
+      </form>
+      <% } %>
   </div>
 </article>
 
@@ -72,6 +78,7 @@
   </h2>
 
   <!-- Add comment form -->
+   <% if(post.profile) { %>
   <form method="POST"
         action="/posts/<%= post.id %>/comment"
         class="comment-form">
@@ -86,6 +93,7 @@
     </button>
     
   </form>
+  <% } %>
 
   <!-- Comment list -->
   <% if (!comments || comments.length === 0) { %>
