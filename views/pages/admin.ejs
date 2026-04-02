@@ -43,17 +43,26 @@
           </div>
 
           <!-- Button OUTSIDE faded area -->
-          <div class="post-card-footer">
-            <% if (profile.deleted_at === null ) { %>
-              <form method="POST" action="/admin/profiles/<%= profile.id %>/deactivate">
-                <button type="submit" class="btn btn-danger btn-sm">Deactivate</button>
-              </form>
-            <% } else { %>
-              <form method="POST" action="/admin/profiles/<%= profile.id %>/activate">
-                <button type="submit" class="btn btn-primary btn-sm">Activate</button>
-              </form>
-            <% } %>
-          </div>
+          <% if(profile.user.role === 'ADMIN') { %>
+              <div class="post-card-footer admin-footer">
+                  <span class="post-stat" style="color:#888;font-size:.82rem">
+                    Admin accounts cannot be deactivated
+                  </span>
+                  <div  class="admin-badge">Admin</div>
+              </div>
+          <%}else{ %>
+            <div class="post-card-footer">
+              <% if (profile.deleted_at === null ) { %>
+                <form method="POST" action="/admin/profiles/<%= profile.id %>/deactivate">
+                  <button type="submit" class="btn btn-danger btn-sm">Deactivate</button>
+                </form>
+              <% } else { %>
+                <form method="POST" action="/admin/profiles/<%= profile.id %>/activate">
+                  <button type="submit" class="btn btn-primary btn-sm">Activate</button>
+                </form>
+              <% } %>
+            </div>
+          <% } %>
 
         </article>
       <% }); %>
