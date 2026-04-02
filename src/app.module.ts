@@ -88,7 +88,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(RefreshTokenMiddleware)
       .forRoutes('/', '/feed', '/profile', '/posts/:id','profile/:id','/profile/:id/follow','/profile/:id/unfollow','/notification',
-        '/feed/post','/request/accept/:id','/request/reject/:id','/profile/edit','/requests','/notification/:id/read',
+        '/feed/post','/request/accept/:id','/request/reject/:id','/profile/edit','/requests','/notification/:id/read', '/chat','/chat/:id',
         '/posts/:id/like', '/posts/:id/unlike','/posts/:id/delete','/admin','/admin/profiles/:id/deactivate','/admin/profiles/:id/activate',
         '/posts/:id/comment','/profile/create','/profile/avatar','/profile/avatar/remove','/search', '/logout')
   }

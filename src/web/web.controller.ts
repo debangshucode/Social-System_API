@@ -261,7 +261,7 @@ export class WebController {
             hasProfile = true;
         }
 
-        const profileID = curUserProfile?.id as number;
+        const profileID = curUserProfile?.id ;
 
         const posts = await this.postsService.findPostByUser(profileID, query);
         const follower = await this.followService.findAll(query, profileID);
@@ -747,5 +747,40 @@ export class WebController {
         console.log(id)
         await this.profileService.restore(id);
         return res.redirect('/admin')
+    }
+
+
+    // chat page
+    @Get('/chat')
+    @UseGuards(webAuthGuard)
+    @UseInterceptors(WebCountsInterceptor)
+    async chatPage(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Paginate() query: PaginateQuery
+    ) {
+        const user = (req as any).user ?? null;
+        const profile = await this.profileService.findByUserId(user.sub);
+        if (!profile) return res.redirect('/profile');
+        const following = await this.followService.findAllFollowing(query, profile.id);
+        console.log(following.data)
+        res.render('pages/chat', this.contextService.build('/chat', user, {
+            title: 'Chat',
+            chatProfiles: following.data,
+            meta: following.meta,
+            reqCount: res.locals.reqCount,
+            nCount: res.locals.nCount,
+        }))
+    }
+
+    @Get('/chat/:id')
+    @UseGuards(webAuthGuard)
+    async chat(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Param('id', ParseIntPipe) id: number
+
+    ){
+        // render chat page with current user and target user 
     }
 }

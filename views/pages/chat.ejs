@@ -1,0 +1,71 @@
+<div class="admin-page">
+  <div class="feed-header">
+    <h1>Chat Panel</h1>
+  </div>
+
+  <div class="post-card" style="margin-bottom:1rem">
+    <div class="post-card-meta">
+      <span class="post-author">Profiles</span>
+      <span class="post-time">Mock View</span>
+    </div>
+    <p class="post-excerpt">
+      Manage profile activation status. Deactivated profiles are shown in gray.
+    </p>
+  </div>
+
+  <% if (!chatProfiles || chatProfiles.length === 0) { %>
+    <p class="empty">No profiles found.</p>
+  <% } else { %>
+    <div class="post-list">
+      <% chatProfiles.forEach(function(follow) { %>
+        <article class="post-card">
+  
+          <div class="post-card-body">
+
+            <div class="post-card-meta">
+              <% if (follow.following.avatar_url) { %>
+                <img src="<%= follow.following.avatar_url %>" class="avatar-sm" />
+              <% } else { %>
+                <div class="avatar-sm avatar-placeholder">
+                  <%= (follow.following.user_name || 'U').charAt(0).toUpperCase() %>
+                </div>
+              <% } %>
+
+              <span class="post-author"><%= follow.following.user_name %></span>
+              <span class="post-time">
+                <%= follow.following.deleted_at === null ? 'Active' : 'Deactivated' %>
+              </span>
+            </div>
+
+            <p class="post-excerpt"><%= follow.following.bio || 'No bio added.' %></p>
+
+          </div>
+
+          <!-- Button OUTSIDE faded area -->
+            <div class="post-card-footer">
+                <form method="POST" action="/chat/<%= follow.following.id %>">
+                  <button type="submit" class="btn btn-primary btn-sm">Chat</button>
+                </form>
+            </div>
+
+        </article>
+      <% }); %>
+    </div>
+
+    <% if (meta && meta.totalPages > 1) { %>
+      <div class="pagination">
+        <% if (meta.currentPage > 1) { %>
+          <a href="/admin?page=<%= meta.currentPage - 1 %>" class="btn btn-sm btn-outline">&larr; Prev</a>
+        <% } %>
+
+        <span class="page-info">
+          Page <%= meta.currentPage %> of <%= meta.totalPages %>
+        </span>
+
+        <% if (meta.currentPage < meta.totalPages) { %>
+          <a href="/admin?page=<%= meta.currentPage + 1 %>" class="btn btn-sm btn-outline">Next &rarr;</a>
+        <% } %>
+      </div>
+    <% } %>
+  <% } %>
+</div>
