@@ -37,7 +37,7 @@ export class PostsService {
 
     if (diffMinutes < 1) return 'just now';
     if (diffMinutes < 60) return `${diffMinutes} min ago`;
-    if(diffHours < 24) return `${diffHours} hr ago ${remainingMinutes} min ago`;
+    if(diffHours < 24) return `${diffHours} hr ${remainingMinutes} min ago`;
     if(diffDays >= 1) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
 
     return `${diffHours} hr ${remainingMinutes} min ago`;
