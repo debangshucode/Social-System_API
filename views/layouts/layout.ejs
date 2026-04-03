@@ -4,7 +4,7 @@
   <%- include('../partials/head') %>
   <%- style %>
 </head>
-<body>
+<body class="<%= user?.role === 'ADMIN' ? 'admin' : '' %>">
   <%- include('../partials/navbar') %>
   <div class="app-shell">
     <%- include('../partials/sidebar') %>

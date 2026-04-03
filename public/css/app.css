@@ -1151,6 +1151,14 @@ body {
   padding: 2px 6px;
   border-radius: 15px;
 }
-.admin-footer{
+
+.admin-footer {
   justify-content: space-between;
+}
+
+.admin {
+  background: #99e8f8;
+  color: #1a1a18;
+  line-height: 1.65;
+  font-size: 15px;
 }
