@@ -19,11 +19,12 @@ import { RefreshTokenMiddleware } from './web/middlewares/refresh-token.middlewa
 import { FollowModule } from './follow/follow.module';
 import { NotificationModule } from './notification/notification.module';
 import { ScheduleModule } from '@nestjs/schedule';
-
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
     ThrottlerModule.forRoot({
       throttlers: [
         {

@@ -7,6 +7,8 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { user_role } from 'src/users/entities/user.entity';
 import { ProfilesService } from 'src/profiles/profiles.service';
+import { EventEmitter2,EventEmitterReadinessWatcher } from '@nestjs/event-emitter';
+
 
 @Injectable()
 export class AuthService {
@@ -15,7 +17,9 @@ export class AuthService {
     private userService:UsersService,
     private jwtService:JwtService,
     private configService:ConfigService,
-    private profileService:ProfilesService
+    private profileService:ProfilesService,
+    private eventEmitter:EventEmitter2,
+    private eventEmitterReadinessWatcher: EventEmitterReadinessWatcher,
   ){}
 
   async register(registerDto:RegisterDto){
@@ -41,6 +45,9 @@ export class AuthService {
 
     const tokens = await this.generateTokens(user.id,user.email,user.role);
     await this.persistRefreshToken(user.id,tokens.refreshToken);
+
+    await this.eventEmitterReadinessWatcher.waitUntilReady();
+    this.eventEmitter.emit('user.login', { userId: user.id, email: user.email });
 
     return {tokens, user};
   }

@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
 import { User } from 'src/users/entities/user.entity';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ProfilesService {
@@ -137,4 +138,11 @@ export class ProfilesService {
       defaultLimit:5
     })
   }
+
+  // event listener for user login
+   @OnEvent('user.login')
+   handleUserLogin(payload: { userId: number; email: string }) {
+     console.log(`User logged in: ${payload.email} (ID: ${payload.userId})`);
+   }
+
 }
