@@ -31,6 +31,8 @@ import { LikesModule } from "src/likes/likes.module";
 import { LikesService } from "src/likes/likes.service";
 
 
+
+
 @Controller()
 export class WebController {
 
@@ -777,7 +779,7 @@ export class WebController {
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) return res.redirect('/profile');
         const following = await this.followService.findAllFollowing(query, profile.id);
-        console.log(following.data)
+        
         res.render('pages/chat', this.contextService.build('/chat', user, {
             title: 'Chat',
             chatProfiles: following.data,
@@ -793,9 +795,21 @@ export class WebController {
     async chat(
         @Req() req: Request,
         @Res() res: Response,
-        @Param('id', ParseIntPipe) id: number
+        @Param('id', ParseIntPipe) id: number //profile id of whom to chat with 
 
     ){
-        // render chat page with current user and target user 
+        const user = (req as any).user ?? null;
+        const profile = await this.profileService.findByUserId(user.sub); // current user profile 
+        if (!profile) return res.redirect('/profile');
+       
+        const chatprofile = await this.profileService.findByProfileId(id) // profile of whom to chat with 
+          
+        res.render('pages/chat-box', this.contextService.build('/chat', user, {
+            title: 'Chat-box',
+            reqCount: res.locals.reqCount,
+            nCount: res.locals.nCount,
+            profile,
+            chatprofile
+        }))
     }
 }

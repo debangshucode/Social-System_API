@@ -43,10 +43,9 @@
 
           <!-- Button OUTSIDE faded area -->
             <div class="post-card-footer">
-                <form method="POST" action="/chat/<%= follow.following.id %>">
-                  <%- include('../partials/csrf-field') %>
+                <a href="/chat/<%= follow.following.id %>">
                   <button type="submit" class="btn btn-primary btn-sm">Chat</button>
-                </form>
+                </a>
             </div>
 
         </article>
