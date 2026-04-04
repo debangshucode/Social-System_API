@@ -87,7 +87,8 @@ export class WebController {
     @Get('/')
     home(@Req() req: Request, @Res() res: Response) {
         const user = (req as any).user ?? null;
-        res.render('pages/home', this.contextService.build('/', user, { title: 'Home' }));
+        const isLogin = req.cookies['refresh_token']
+        res.render('pages/home', this.contextService.build('/', user, { title: 'Home' ,isLogin}));
     }
 
 

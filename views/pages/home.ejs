@@ -2,7 +2,7 @@
   <h1>Welcome to App</h1>
   <p class="hero-sub">Share posts, connect with people.</p>
   <div class="hero-actions">
-    <% if (typeof user !== 'undefined' && user) { %>
+    <% if (isLogin) { %>
       <a href="/feed" class="btn btn-primary">Go to feed</a>
     <% } else { %>
       <a href="/signup" class="btn btn-primary">Get started</a>
