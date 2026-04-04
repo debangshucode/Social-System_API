@@ -4,6 +4,7 @@
     <h2>Set up your profile</h2>
     <p>Choose a username to get started.</p>
     <form method="POST" action="/profile/create">
+      <%- include('../partials/csrf-field') %>
       <div class="form-group" style="text-align:left">
         <label for="user_name">Username</label>
         <input id="user_name" type="text" name="user_name"
@@ -52,6 +53,7 @@
           Edit Profile
         </a>
         <form id="editForm" method="POST" action="/profile/edit" style="display:none;">
+            <%- include('../partials/csrf-field') %>
             <div class="form-group" style="text-align:left">
               <label for="user_name">Username</label>
               <input id="user_name" type="text" name="user_name"
@@ -102,6 +104,7 @@
     <h2 style="font-size:1rem;margin-bottom:1rem">Profile picture</h2>
 
     <form method="POST" action="/profile/avatar" id="avatar-form">
+      <%- include('../partials/csrf-field') %>
       <input type="hidden" name="public_id" id="avatar-public-id" />
       <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
           <label class="btn btn-outline btn-sm" style="cursor:pointer">
@@ -122,6 +125,7 @@
 
        <% if (profile.avatar_url) { %>
         <form method="POST" action="/profile/avatar/remove" style="margin-top:.6rem">
+          <%- include('../partials/csrf-field') %>
           <button type="submit" class="btn btn-outline btn-sm"
                   style="color:#a32d2d;border-color:#f09595"
                   onclick="return confirm('Remove your avatar?')">

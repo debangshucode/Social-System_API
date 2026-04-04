@@ -46,6 +46,7 @@
     "class-validator": "^0.14.4",
     "cloudinary": "^2.9.0",
     "cookie-parser": "^1.4.7",
+    "csrf-csrf": "^4.0.3",
     "ejs": "^5.0.1",
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.19.0",

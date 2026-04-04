@@ -54,10 +54,12 @@
             <div class="post-card-footer">
               <% if (profile.deleted_at === null ) { %>
                 <form method="POST" action="/admin/profiles/<%= profile.id %>/deactivate">
+                  <%- include('../partials/csrf-field') %>
                   <button type="submit" class="btn btn-danger btn-sm">Deactivate</button>
                 </form>
               <% } else { %>
                 <form method="POST" action="/admin/profiles/<%= profile.id %>/activate">
+                  <%- include('../partials/csrf-field') %>
                   <button type="submit" class="btn btn-primary btn-sm">Activate</button>
                 </form>
               <% } %>

@@ -25,6 +25,7 @@
       </span>
       <a href="/profile" class="navbar-link">Profile</a>
       <form method="POST" action="/logout" class="inline-form">
+        <%- include('./csrf-field') %>
         <button type="submit" class="btn-text">Logout</button>
       </form>
     <% } else { %>

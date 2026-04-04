@@ -10,6 +10,7 @@
                 <li class="user-card">
 
                     <form action="/notification/<%= notification.id %>/read" method="POST">
+                    <%- include('../partials/csrf-field') %>
                     <input type="hidden" name="postId" value="<%= notification.post.id %>" />
 
                     <button type="submit" style="all: unset; width: 100%; display: block; cursor: pointer;">
@@ -44,6 +45,7 @@
             <% } else { %>
                     <li class="user-card">
                         <form action="/notification/<%= notification.id %>/read" method="POST">
+                            <%- include('../partials/csrf-field') %>
                             <input type="hidden" name="notificationType" value="<%= notification.type %>" />
                             <input type="hidden" name="profileId" value="<%= notification.sender?.id %>" />
 

@@ -6,6 +6,7 @@
   <% } %>
 
   <form method="POST" action="/signup">
+    <%- include('../partials/csrf-field') %>
     <div class="form-row">
       <div class="form-group">
         <label for="first_name">First name</label>

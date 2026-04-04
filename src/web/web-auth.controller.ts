@@ -6,6 +6,9 @@ import { LoginDto } from 'src/auth/dto/login.dto';
 import { RegisterDto } from 'src/auth/dto/register.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { generateCsrfToken } from 'src/security/csrf';
+
+
 
 @Controller()
 export class WebAuthController {
@@ -17,7 +20,7 @@ export class WebAuthController {
   ) {}
 
   @Get('/login')
-  loginPage(@Res() res: Response) {
+  loginPage(@Req() req:Request,@Res() res: Response) {
     res.render('pages/login', {
       ...this.contextService.build('/login', null, { title: 'Login' }),
       layout: 'layouts/auth',
@@ -25,7 +28,7 @@ export class WebAuthController {
   }
 
   @Post('/login')
-  async loginSubmit(@Body() body: LoginDto, @Res() res: Response) {
+  async loginSubmit(@Req() req:Request,@Body() body: LoginDto, @Res() res: Response) {
     try {
       const result = await this.authService.login(body);
       res.cookie('access_token', result.tokens.accessToken, {

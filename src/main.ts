@@ -6,17 +6,30 @@ import { ConsoleLogger, VersioningType } from '@nestjs/common';
 import expressLayouts from 'express-ejs-layouts'
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
-
-
+import { doubleCsrfProtection } from './security/csrf';
+import { csrfViewMiddleware } from './web/middlewares/csrf-view.middleware';
+import express from 'express'
 
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule,{
-    logger:new ConsoleLogger({
-      json: true,
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: new ConsoleLogger({
+      // json: true,
     })
   });
   app.use(cookieParser());
+  app.use(express.urlencoded({ extended: true }))
+  app.use(express.json())
+  app.use(csrfViewMiddleware);
+
+  app.use(doubleCsrfProtection);
+  app.use((req, res, next) => {
+    if (req.body && typeof req.body === 'object' && '_csrf' in req.body) {
+      delete req.body._csrf;
+    }
+    next();
+  }); // this is to validate the csrf and then remove it from the body before it reaches to validation pipe 
+
   app.enableCors();
 
   //*1  ejs layout set-up
@@ -34,9 +47,9 @@ async function bootstrap() {
 
   // *3 Global API prefix — SSR routes excluded
   app.setGlobalPrefix('api', {
-    exclude: ['/', '/login', '/signup', '/feed', '/profile','/profile/create', '/logout', 'profile/:id','/profile/:id/follow','/profile/:id/unfollow','/chat','/chat/:id',
-      '/feed/post','/notification','/request/accept/:id','/request/reject/:id','/profile/edit','/requests','/notification/:id/read','/admin/profiles/:id/deactivate',
-      'posts/:id', 'posts/:id/like','/profile/avatar/remove','/search', 'posts/:id/unlike','/profile/avatar','/posts/:id/delete','/admin','/admin/profiles/:id/activate',
+    exclude: ['/', '/login', '/signup', '/feed', '/profile', '/profile/create', '/logout', 'profile/:id', '/profile/:id/follow', '/profile/:id/unfollow', '/chat', '/chat/:id',
+      '/feed/post', '/notification', '/request/accept/:id', '/request/reject/:id', '/profile/edit', '/requests', '/notification/:id/read', '/admin/profiles/:id/deactivate',
+      'posts/:id', 'posts/:id/like', '/profile/avatar/remove', '/search', 'posts/:id/unlike', '/profile/avatar', '/posts/:id/delete', '/admin', '/admin/profiles/:id/activate',
       'posts/:id/comment'],
   });
   // *3

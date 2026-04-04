@@ -35,6 +35,7 @@
                         <div class="actions">
                             <!-- accept  -->
                             <form method="POST" action="/request/accept/<%= followReq.id %>">
+                                <%- include('../partials/csrf-field') %>
                                 <button type="submit" class="btn btn-green btn-sm">
                                   Accept
                                 </button>
@@ -43,6 +44,7 @@
 
                             <!-- Reject -->
                             <form method="POST" action="/request/reject/<%= followReq.id %>">
+                               <%- include('../partials/csrf-field') %>
                                <button type="submit" class="btn btn-danger btn-sm">
                                  Reject
                                </button>
