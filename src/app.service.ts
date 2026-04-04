@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {Cron , CronExpression} from '@nestjs/schedule';
 
 
@@ -10,6 +10,6 @@ export class AppService {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   handleCron() {
-    console.log('Running a task every 10 seconds');
+    Logger.log('Running a task every 10 seconds');
   }
 }

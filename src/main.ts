@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { VersioningType } from '@nestjs/common';
+import { ConsoleLogger, VersioningType } from '@nestjs/common';
 import expressLayouts from 'express-ejs-layouts'
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -11,7 +11,11 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule,{
+    logger:new ConsoleLogger({
+      json: true,
+    })
+  });
   app.use(cookieParser());
   app.enableCors();
 
