@@ -18,11 +18,12 @@ import { WebModule } from './web/web.module';
 import { RefreshTokenMiddleware } from './web/middlewares/refresh-token.middleware';
 import { FollowModule } from './follow/follow.module';
 import { NotificationModule } from './notification/notification.module';
-
+import { ScheduleModule } from '@nestjs/schedule';
 
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot({
       throttlers: [
         {

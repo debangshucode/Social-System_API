@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Follow, follow_status } from './entities/follow.entity';
 import { Repository } from 'typeorm';
 import { paginate, PaginateQuery } from 'nestjs-paginate';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class FollowService {
@@ -19,8 +20,8 @@ export class FollowService {
                 return existing;
             }
             await this.followRepo.restore(existing.id)
-            const follow =  await this.followRepo.findOne({ where: { id: existing.id } });
-            if(!follow) throw new NotFoundException('No follow found ');
+            const follow = await this.followRepo.findOne({ where: { id: existing.id } });
+            if (!follow) throw new NotFoundException('No follow found ');
             follow.status = follow_status.PENDING;
             await this.followRepo.save(follow)
             return follow;
@@ -73,7 +74,7 @@ export class FollowService {
         return paginate(query, db, {
             sortableColumns: ['created_at'],
             defaultSortBy: [['created_at', 'DESC']],
-            defaultLimit:2
+            defaultLimit: 2
         });
     }
 
@@ -96,7 +97,7 @@ export class FollowService {
         return paginate(query, db, {
             sortableColumns: ['created_at'],
             defaultSortBy: [['created_at', 'DESC']],
-            defaultLimit:2
+            defaultLimit: 2
         });
     }
 
@@ -135,6 +136,17 @@ export class FollowService {
         });
     }
 
+    @Cron(CronExpression.EVERY_10_SECONDS)
+    async rejectRequest(): Promise<void> {
+        await this.followRepo
+            .createQueryBuilder()
+            .update()
+            .set({ status: follow_status.REJECT })
+            .set({ deleted_at: new Date() })
+            .where('status = :status', { status: follow_status.PENDING })
+            .execute();
+    }
+
     async countPending(profileId: number): Promise<number> {
         return this.followRepo.count({
             where: {
@@ -170,22 +182,22 @@ export class FollowService {
         return this.followRepo.softDelete(follow.id)
     }
 
-    async findFollowerByFollowId(followId:number){
-        const follow = await this.followRepo.findOne({where:{id:followId,status:follow_status.PENDING}});
-        if(!follow) throw new NotFoundException('no follow req found')
+    async findFollowerByFollowId(followId: number) {
+        const follow = await this.followRepo.findOne({ where: { id: followId, status: follow_status.PENDING } });
+        if (!follow) throw new NotFoundException('no follow req found')
         const reqProfileId = follow.follower_id;
         return reqProfileId;
     }
 
 
-    async canAccess(curPfId:number , ownerPfID:number){
-        if(curPfId === ownerPfID) return true 
-        
+    async canAccess(curPfId: number, ownerPfID: number) {
+        if (curPfId === ownerPfID) return true
+
         const follow = await this.followRepo.findOne({
-            where:{
-                follower_id:curPfId,
-                following_id:ownerPfID,
-                status:follow_status.ACCEPT,
+            where: {
+                follower_id: curPfId,
+                following_id: ownerPfID,
+                status: follow_status.ACCEPT,
             }
         })
 
