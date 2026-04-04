@@ -2,7 +2,6 @@ import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { AuthModule } from "src/auth/auth.module";
 import { CommentsModule } from "src/comments/comments.module";
-import { LikesModule } from "src/likes/likes.module";
 import { PostsModule } from "src/posts/posts.module";
 import { ProfilesModule } from "src/profiles/profiles.module";
 import { WebController } from "./web.controller";
@@ -23,7 +22,7 @@ import { WebCountsInterceptor } from "./interceptors/web-counts.interceptor";
         PostsModule,
         ProfilesModule,
         CommentsModule,
-        LikesModule,
+        
         AvatarModule,
         FollowModule,
         NotificationModule,

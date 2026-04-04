@@ -1,7 +1,6 @@
 import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, ParseIntPipe, Post, Query, Redirect, Req, Res, UseGuards } from "@nestjs/common";
 import { webContextService } from "./web-context.service";
 import { PostsService } from "src/posts/posts.service";
-import { LikesService } from "src/likes/likes.service";
 import { CommentsService } from "src/comments/comments.service";
 import { ProfilesService } from "src/profiles/profiles.service";
 import type { Request, Response } from "express";
@@ -27,7 +26,9 @@ import { WebCountsInterceptor } from "./interceptors/web-counts.interceptor";
 import { RoleGuard } from "src/auth/guards/roles.guard";
 import { Roles } from "src/auth/decorators/roles.decorator";
 import { user_role } from "src/users/entities/user.entity";
-
+import { LazyModuleLoader } from "@nestjs/core";
+import { LikesModule } from "src/likes/likes.module";
+import { LikesService } from "src/likes/likes.service";
 
 
 @Controller()
@@ -37,13 +38,19 @@ export class WebController {
         private readonly contextService: webContextService,
         private readonly postsService: PostsService,
         private readonly profileService: ProfilesService,
-        private readonly likesService: LikesService,
+        private readonly lazyModuleLoader: LazyModuleLoader,
         private readonly commentsService: CommentsService,
         private readonly avatarService: AvatarService,
         private readonly followService: FollowService,
         private readonly notificationService: NotificationService,
     ) { }
 
+    //lazy loaded like service 
+
+    private async getLikeService(){
+        const moduleRef = await this.lazyModuleLoader.load(()=>LikesModule);
+        return moduleRef.get(LikesService,{strict:false});
+    }
     // & File upload helper functions
 
     private static postMediaFileFilter(
@@ -416,12 +423,14 @@ export class WebController {
         const user = (req as any).user;
         const profile = await this.profileService.findByUserId(user.sub);
         const postOwnerId = await this.postsService.findProfileByPostId(id);
+        const likesService = await this.getLikeService();
+
         if (!profile) throw new NotFoundException('profile not found');
 
         const canAccess = await this.followService.canAccess(profile.id, postOwnerId);
         if(!canAccess && user.role!==user_role.ADMIN) throw new ForbiddenException('Follow this user to commnet this post');
         try {
-            await this.likesService.create(profile.id, id)
+            await likesService.create(profile.id, id)
             const message = ` has liked your post`
             await this.notificationService.create(postOwnerId, profile.id, notification_type.LIKE, message, id);
         }
@@ -442,10 +451,11 @@ export class WebController {
     ) {
         const user = (req as any).user;
         const profile = await this.profileService.findByUserId(user.sub);
+        const likesService = await this.getLikeService()
         if (!profile) throw new NotFoundException('Profile not found');
 
         try {
-            await this.likesService.remove(profile.id, id);
+            await likesService.remove(profile.id, id);
         }
         catch { }
         res.redirect(`/posts/${id}`);
