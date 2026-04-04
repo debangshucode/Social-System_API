@@ -12,7 +12,7 @@
 
 <div id="add-post-form" style="display:none;background:#fff;border:1px solid #e5e4df;border-radius:10px;padding:1.25rem;margin-bottom:1.25rem">
   <form method="POST" action="/feed/post" enctype="multipart/form-data" id="create-post-form">
-    <%- include('../partials/csrf-field') %>
+   
     <div class="form-group">
       <label for="post-content">What's on your mind?</label>
       <textarea id="post-content" name="content" rows="4" required placeholder="Write your post..."></textarea>
@@ -162,4 +162,36 @@
       }
     });
   })();
+</script>
+
+<script>
+  const createPostForm = document.getElementById('create-post-form');
+
+  createPostForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const csrfToken = document
+      .querySelector('meta[name="csrf-token"]')
+      ?.getAttribute('content');
+
+    const response = await fetch('/feed/post', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRF-Token': csrfToken ?? '',
+      },
+      credentials: 'include',
+    });
+
+    if (response.redirected) {
+      window.location.href = response.url;
+      return;
+    }
+
+    if (!response.ok) {
+      alert('Failed to create post');
+    }
+  });
 </script>
