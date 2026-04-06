@@ -1058,6 +1058,7 @@ body {
   .sidebar {
     width: 100%;
     border-right: 0;
+    justify-content: center;
     border-bottom: 1px solid var(--line);
     display: flex;
     flex-wrap: wrap;
@@ -1704,4 +1705,34 @@ body {
 .chat-compose-submit {
   height: fit-content;
   padding: 0.8rem 1.25rem;
+}
+
+
+@media (max-width: 768px) {
+  .chat-room-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 560px;
+  }
+  .chat-room-sidebar{
+    display: none;
+  }
+  .post-list{
+    width: 90vw;
+  }
+  .media-image-contain{
+    max-width: 100%;
+  }
+  .user-card-bio{
+    width:65vw
+  }
+  .notification-page .user-card{
+    width: 90vw;
+  }
+  .navbar-user{
+    display: none;
+  }
+  .avatar-picker-row{
+    justify-content: space-between;
+  }
 }

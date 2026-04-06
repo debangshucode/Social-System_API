@@ -32,9 +32,7 @@
               <% } %>
 
               <span class="post-author"><%= follow.following.user_name %></span>
-              <span class="post-time">
-                <%= follow.following.deleted_at === null ? 'Active' : 'Deactivated' %>
-              </span>
+              
             </div>
 
             <p class="post-excerpt"><%= follow.following.bio || 'No bio added.' %></p>
