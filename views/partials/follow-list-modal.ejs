@@ -30,7 +30,7 @@
       <% } %>
 
       <% if (meta && meta.totalPages > 1) { %>
-        <div class="pagination" style="margin-top:1rem">
+        <div class="pagination modal-pagination-spaced">
           <% if (meta.currentPage > 1) { %>
             <a
               href="<%= basePath %>?page=<%= meta.currentPage - 1 %>&<%= otherPageParam %>=<%= otherCurrentPage || 1 %>&openModal=<%= modalId %>"

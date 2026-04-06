@@ -5,14 +5,14 @@
     <p>Choose a username to get started.</p>
     <form method="POST" action="/profile/create">
       <%- include('../partials/csrf-field') %>
-      <div class="form-group" style="text-align:left">
+      <div class="form-group text-left">
         <label for="user_name">Username</label>
         <input id="user_name" type="text" name="user_name"
                required minlength="3" maxlength="30"
                placeholder="e.g. johndoe" />
       </div>
-      <div class="form-group" style="text-align:left">
-         <label for="bio">Bio <span style="color:#aaa;font-weight:400">(optional)</span></label>
+      <div class="form-group text-left">
+         <label for="bio">Bio <span class="optional-note">(optional)</span></label>
         <textarea id="bio" name="bio" rows="3"
                   placeholder="Tell people a bit about yourself..."
                   maxlength="300"></textarea>
@@ -49,19 +49,19 @@
 
       <!-- OWN PROFILE ACTION -->
       <div class="edit-profile">
-        <a href="#" id="editBtn" class="btn btn-outline btn-sm" style="display: block;">
+        <a href="#" id="editBtn" class="btn btn-outline btn-sm edit-link-block">
           Edit Profile
         </a>
-        <form id="editForm" method="POST" action="/profile/edit" style="display:none;">
+        <form id="editForm" method="POST" action="/profile/edit" class="edit-form-hidden">
             <%- include('../partials/csrf-field') %>
-            <div class="form-group" style="text-align:left">
+            <div class="form-group text-left">
               <label for="user_name">Username</label>
               <input id="user_name" type="text" name="user_name"
                      minlength="3" maxlength="30" value="<%= profile.user_name %>"
                      placeholder="<%= profile.user_name %>" />
             </div>
-            <div class="form-group" style="text-align:left">
-               <label for="bio">Bio <span style="color:#aaa;font-weight:400">(optional)</span></label>
+            <div class="form-group text-left">
+               <label for="bio">Bio <span class="optional-note">(optional)</span></label>
              <textarea id="bio" name="bio" rows="3" maxlength="300"><%= profile.bio %></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Save profile</button>
@@ -101,33 +101,32 @@
 
   <!-- AVATAR UPLOAD -->
   <div class="profile-section">
-    <h2 style="font-size:1rem;margin-bottom:1rem">Profile picture</h2>
+    <h2 class="text-title-sm">Profile picture</h2>
 
     <form method="POST" action="/profile/avatar" id="avatar-form">
       <%- include('../partials/csrf-field') %>
       <input type="hidden" name="public_id" id="avatar-public-id" />
-      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
-          <label class="btn btn-outline btn-sm" style="cursor:pointer">
+      <div class="avatar-picker-row">
+          <label class="btn btn-outline btn-sm avatar-picker-label">
             Choose image
             <input type="file" id="avatar-file-input"
                    accept="image/jpeg,image/png,image/webp"
-                   style="display:none"
+                   class="file-input-hidden"
                    onchange="handleAvatarFile(this)" />
           </label>
-          <span id="avatar-file-name" style="font-size:.875rem;color:#666"></span>
+          <span id="avatar-file-name" class="text-muted-sm"></span>
           <button type="submit" id="avatar-submit-btn"
                   class="btn btn-primary btn-sm" disabled>
             Save avatar
           </button>
         </div>
-        <p id="avatar-status" style="font-size:.825rem;margin-top:.5rem;color:#666"></p>
+        <p id="avatar-status" class="text-muted-sm"></p>
       </form>
 
        <% if (profile.avatar_url) { %>
-        <form method="POST" action="/profile/avatar/remove" style="margin-top:.6rem">
+        <form method="POST" action="/profile/avatar/remove" class="mt-06">
           <%- include('../partials/csrf-field') %>
-          <button type="submit" class="btn btn-outline btn-sm"
-                  style="color:#a32d2d;border-color:#f09595"
+          <button type="submit" class="btn btn-outline btn-sm avatar-remove-btn"
                   onclick="return confirm('Remove your avatar?')">
             Remove avatar
           </button>
@@ -165,16 +164,16 @@
             </p>
 
             <% if (post.media_path) { %>
-              <div class="post-media" style="margin-bottom:1rem">
+              <div class="post-media post-media-spaced">
                 <% if (post.media_type === 'VIDEO') { %>
-                  <video controls style="width:100%;max-height:420px;border-radius:10px">
+                  <video controls class="media-video-full">
                     <source src="<%= post.media_path %>" type="<%= post.media_mime || 'video/mp4' %>" />
                   </video>
                 <% } else { %>
                   <img
                     src="<%= post.media_path %>"
                     alt="Post media"
-                    style="width:100%;max-height:420px;object-fit:cover;border-radius:10px" />
+                    class="media-image-cover" />
                 <% } %>
               </div>
             <% } %>

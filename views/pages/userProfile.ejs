@@ -113,16 +113,16 @@
             </p>
 
               <% if (post.media_path) { %>
-                <div class="post-media" style="margin-bottom:1rem">
+                <div class="post-media post-media-spaced">
                   <% if (post.media_type === 'VIDEO') { %>
-                    <video controls style="width:100%;max-height:420px;border-radius:10px">
+                    <video controls class="media-video-full">
                       <source src="<%= post.media_path %>" type="<%= post.media_mime || 'video/mp4' %>" />
                     </video>
                   <% } else { %>
                     <img
                       src="<%= post.media_path %>"
                       alt="Post media"
-                      style="width:100%;max-height:420px;object-fit:cover;border-radius:10px" />
+                      class="media-image-cover" />
                   <% } %>
                 </div>
               <% } %>

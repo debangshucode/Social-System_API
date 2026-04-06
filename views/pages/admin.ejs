@@ -3,7 +3,7 @@
     <h1>Admin Panel</h1>
   </div>
 
-  <div class="post-card" style="margin-bottom:1rem">
+  <div class="post-card post-card-spaced">
     <div class="post-card-meta">
       <span class="post-author">Profiles</span>
       <span class="post-time">Mock View</span>
@@ -20,8 +20,7 @@
       <% data.forEach(function(profile) { %>
         <article class="post-card" onclick="window.location.href=`profile/<%=profile.id %>`">
   
-          <div class="post-card-body"
-              style="<%= profile.deleted_at === null ? '' : 'opacity:.55;filter:grayscale(1)' %>">
+          <div class="post-card-body <%= profile.deleted_at === null ? '' : 'profile-faded' %>">
 
             <div class="post-card-meta">
               <% if (profile.avatar_url) { %>
@@ -45,7 +44,7 @@
           <!-- Button OUTSIDE faded area -->
           <% if(profile.user.role === 'ADMIN') { %>
               <div class="post-card-footer admin-footer">
-                  <span class="post-stat" style="color:#888;font-size:.82rem">
+                  <span class="post-stat admin-disabled-meta">
                     Admin accounts cannot be deactivated
                   </span>
                   <div  class="admin-badge">Admin</div>

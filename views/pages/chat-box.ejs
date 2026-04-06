@@ -1,52 +1,42 @@
-<div class="chat-room" style="max-width:960px;margin:0 auto;">
-  <div
-    class="chat-room-card"
-    style="background:#fff;border:1px solid #e5e4df;border-radius:18px;overflow:hidden;box-shadow:0 16px 40px rgba(26,26,24,0.08);"
-  >
-    <div
-      class="chat-room-header"
-      style="display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.25rem 1.5rem;border-bottom:1px solid #eceae3;background:linear-gradient(135deg,#f8f7f2 0%,#f1efe6 100%);"
-    >
-      <div style="display:flex;align-items:center;gap:1rem;min-width:0;">
+<div class="chat-room">
+  <div class="chat-room-card">
+    <div class="chat-room-header">
+      <div class="chat-room-ident">
         <% if (chatprofile?.avatar_url) { %>
           <img
             src="<%= chatprofile.avatar_url %>"
             alt="<%= chatprofile.user_name %>"
-            style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid #fff;"
+            class="chat-avatar-lg"
           />
         <% } else { %>
-          <div
-            style="width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:#534ab7;color:#fff;font-weight:700;font-size:1.1rem;"
-          >
+          <div class="chat-avatar-fallback chat-avatar-fallback-lg">
             <%= (chatprofile?.user_name ?? 'U').charAt(0).toUpperCase() %>
           </div>
         <% } %>
 
-        <div style="min-width:0;">
-          <h1 style="font-size:1.2rem;line-height:1.2;"><%= chatprofile?.user_name ?? 'Chat user' %></h1>
-          <p style="margin-top:.2rem;color:#666;font-size:.9rem;">
+        <div class="chat-room-ident-copy">
+          <h1 class="chat-room-title"><%= chatprofile?.user_name ?? 'Chat user' %></h1>
+          <p class="chat-room-subtitle">
             <%= chatprofile?.bio || 'Start the conversation.' %>
           </p>
         </div>
       </div>
 
-      <div style="text-align:right;flex-shrink:0;">
-        <p style="font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:#8a867c;">You</p>
-        <div style="display:flex;align-items:center;gap:.65rem;margin-top:.35rem;">
+      <div class="chat-room-self">
+        <p class="chat-room-label">You</p>
+        <div class="chat-room-self-row">
           <div>
-            <p style="font-weight:600;"><%= profile?.user_name ?? 'Current user' %></p>
-            <p style="font-size:.82rem;color:#666;"><%= profile?.bio || 'Ready to chat' %></p>
+            <p class="chat-room-self-name"><%= profile?.user_name ?? 'Current user' %></p>
+            <p class="chat-room-self-bio"><%= profile?.bio || 'Ready to chat' %></p>
           </div>
           <% if (profile?.avatar_url) { %>
-            <img
-              src="<%= profile.avatar_url %>"
-              alt="<%= profile.user_name %>"
-              style="width:42px;height:42px;border-radius:50%;object-fit:cover;"
+          <img
+            src="<%= profile.avatar_url %>"
+            alt="<%= profile.user_name %>"
+              class="chat-avatar-md"
             />
           <% } else { %>
-            <div
-              style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#534ab7;color:#fff;font-weight:700;font-size:1.1rem;"
-            >
+            <div class="chat-avatar-fallback chat-avatar-fallback-md chat-avatar-chat">
               <%= (profile?.user_name ?? 'U').charAt(0).toUpperCase() %>
             </div>
           <% } %>
@@ -54,106 +44,73 @@
       </div>
     </div>
 
-    <div
-      class="chat-room-body"
-      style="display:grid;grid-template-columns:220px minmax(0,1fr);min-height:560px;"
-    >
-      <aside
-        class="chat-room-sidebar"
-        style="border-right:1px solid #eceae3;padding:1.25rem;background:#faf9f5;"
-      >
-        <p style="font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:#8a867c;">Participants</p>
+    <div class="chat-room-body">
+      <aside class="chat-room-sidebar">
+        <p class="chat-room-label">Participants</p>
 
-        <div style="margin-top:1rem;display:grid;gap:.85rem;">
-          <div style="display:flex;align-items:center;gap:.75rem;padding:.8rem;border-radius:14px;background:#fff;border:1px solid #eceae3;">
+        <div class="chat-room-participants">
+          <div class="chat-room-user-card">
             <% if (profile?.avatar_url) { %>
               <img
                 src="<%= profile.avatar_url %>"
                 alt="<%= profile.user_name %>"
-                style="width:40px;height:40px;border-radius:50%;object-fit:cover;"
+                class="chat-avatar-sm"
               />
             <% } else { %>
-              <div
-                style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#534ab7;color:#fff;font-weight:700;font-size:1.1rem;"
-              >
+              <div class="chat-avatar-fallback chat-avatar-fallback-sm chat-avatar-chat">
                 <%= (profile?.user_name ?? 'U').charAt(0).toUpperCase() %>
               </div>
             <% } %>
-            <div style="min-width:0;">
-              <p style="font-weight:600;"><%= profile?.user_name ?? 'You' %></p>
-              <p style="font-size:.82rem;color:#666;">Current profile</p>
+            <div class="chat-room-user-copy">
+              <p class="chat-room-self-name"><%= profile?.user_name ?? 'You' %></p>
+              <p class="chat-room-user-meta">Current profile</p>
             </div>
           </div>
 
-          <div style="display:flex;align-items:center;gap:.75rem;padding:.8rem;border-radius:14px;background:#fff;border:1px solid #eceae3;">
+          <div class="chat-room-user-card">
             <% if (chatprofile?.avatar_url) { %>
               <img
                 src="<%= chatprofile.avatar_url %>"
                 alt="<%= chatprofile.user_name %>"
-                style="width:40px;height:40px;border-radius:50%;object-fit:cover;"
+                class="chat-avatar-sm"
               />
             <% } else { %>
-              <div
-                style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#534ab7;color:#fff;font-weight:700;"
-              >
+              <div class="chat-avatar-fallback chat-avatar-fallback-sm chat-avatar-chat">
                 <%= (chatprofile?.user_name ?? 'U').charAt(0).toUpperCase() %>
               </div>
             <% } %>
-            <div style="min-width:0;">
-              <p style="font-weight:600;"><%= chatprofile?.user_name ?? 'Chat user' %></p>
-              <p style="font-size:.82rem;color:#666;">Conversation partner</p>
+            <div class="chat-room-sidebar-copy">
+              <p class="chat-room-self-name"><%= chatprofile?.user_name ?? 'Chat user' %></p>
+              <p class="chat-room-user-meta">Conversation partner</p>
             </div>
           </div>
         </div>
       </aside>
 
-      <section
-        class="chat-room-main"
-        style="display:flex;flex-direction:column;background:linear-gradient(180deg,#fcfbf8 0%,#f6f4ee 100%);"
-      >
-        <div style="padding:1.2rem 1.25rem;border-bottom:1px solid #eceae3;background:rgba(255,255,255,0.75);backdrop-filter:blur(6px);">
-          <p style="font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:#8a867c;">Direct chat</p>
-          <h2 style="margin-top:.3rem;font-size:1rem;color:#201d18;">Message <%= chatprofile?.user_name ?? 'user' %></h2>
+      <section class="chat-room-main">
+        <div class="chat-room-main-head">
+          <p class="chat-room-label">Direct chat</p>
+          <h2 class="chat-room-main-title">Message <%= chatprofile?.user_name ?? 'user' %></h2>
         </div>
 
-        <div id="chat-thread" style="flex:1;padding:1.25rem;display:flex;flex-direction:column;gap:1rem;overflow:auto;">
+        <div id="chat-thread" class="chat-thread">
           <% if (data && data.length > 0) { %>
             <% data.slice().reverse().forEach(function(message) { %>
               <% const mine = message.sender_id === profile.id; %>
-              <div
-                style="
-                  align-self:<%= mine ? 'flex-end' : 'flex-start' %>;
-                  max-width:72%;
-                  padding:.9rem 1rem;
-                  border-radius:<%= mine ? '18px 18px 6px 18px' : '18px 18px 18px 6px' %>;
-                  background:<%= mine ? '#534ab7' : '#fff' %>;
-                  color:<%= mine ? '#fff' : '#1a1a18' %>;
-                  border:<%= mine ? 'none' : '1px solid #eceae3' %>;
-                  box-shadow:<%= mine ? '0 10px 24px rgba(83,74,183,0.18)' : 'none' %>;
-                "
-              >
-                <p style="font-weight:600;font-size:.88rem;margin-bottom:.2rem;">
+              <div class="chat-bubble <%= mine ? 'chat-bubble-me' : 'chat-bubble-other' %>">
+                <p class="chat-message-author">
                   <%= mine ? (profile?.user_name ?? 'You') : (chatprofile?.user_name ?? 'User') %>
                 </p>
-                <p style="white-space:pre-wrap;word-break:break-word;"><%= message.content %></p>
-                <p
-                  style="
-                    margin-top:.45rem;
-                    font-size:.74rem;
-                    color:<%= mine ? 'rgba(255,255,255,0.78)' : '#7a766d' %>;
-                    text-align:right;
-                  "
-                >
+                <p class="chat-message-content"><%= message.content %></p>
+                <p class="chat-message-time <%= mine ? 'chat-message-time-me' : 'chat-message-time-other' %>">
                   <%= new Date(message.created_at).toLocaleString() %>
                 </p>
               </div>
             <% }) %>
           <% } else { %>
-            <div
-              style="margin:auto;max-width:420px;text-align:center;padding:1.5rem;border:1px dashed #d8d4cb;border-radius:18px;background:rgba(255,255,255,0.7);"
-            >
-              <p style="font-weight:600;font-size:1rem;color:#2a2722;">No messages yet</p>
-              <p style="margin-top:.35rem;color:#6f6b63;">
+            <div class="chat-empty">
+              <p class="chat-empty-title">No messages yet</p>
+              <p class="chat-empty-copy">
                 Start the conversation with <%= chatprofile?.user_name ?? 'this user' %>.
               </p>
             </div>
@@ -161,14 +118,14 @@
         </div>
 
         <% if (meta && meta.totalPages > 1) { %>
-          <div style="padding:0 1.25rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+          <div class="chat-pagination">
             <% if (meta.currentPage < meta.totalPages) { %>
               <a href="/chat/<%= chatprofile.id %>?page=<%= meta.currentPage + 1 %>" class="btn btn-sm btn-outline">Older</a>
             <% } else { %>
               <span></span>
             <% } %>
 
-            <span style="font-size:.82rem;color:#666;">
+            <span class="chat-pagination-status">
               Page <%= meta.currentPage %> of <%= meta.totalPages %>
             </span>
 
@@ -181,11 +138,11 @@
         <form
           method="POST"
           action="/chat/<%= chatprofile.id %>"
-          style="padding:1rem 1.25rem;border-top:1px solid #eceae3;background:#fff;display:flex;gap:.85rem;align-items:flex-end;"
+          class="chat-compose"
         >
           <%- include('../partials/csrf-field') %>
-          <div style="flex:1;">
-            <label for="message" style="display:block;font-size:.8rem;font-weight:600;color:#666;margin-bottom:.45rem;">
+          <div class="chat-compose-main">
+            <label for="message" class="chat-compose-label">
               Message
             </label>
             <textarea
@@ -193,11 +150,11 @@
               name="message"
               rows="3"
               placeholder="Write a message to <%= chatprofile?.user_name ?? 'this user' %>..."
-              style="width:100%;resize:none;padding:.85rem 1rem;border:1px solid #d9d6cf;border-radius:16px;background:#faf9f5;font:inherit;line-height:1.5;"
+              class="chat-compose-input"
               required
             ></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="height:fit-content;padding:.8rem 1.25rem;">
+          <button type="submit" class="btn btn-primary chat-compose-submit">
             Send
           </button>
         </form>

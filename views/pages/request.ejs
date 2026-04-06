@@ -8,7 +8,7 @@
         <% fData.forEach(function(followReq) { %>
                 <a href="/profile/<%= followReq.follower.id %>">
                     <li class="user-card">
-                        <p style="width: 100%;">Follow request</p>
+                        <p class="follow-request-title">Follow request</p>
                         <div class="users-data">
                             <div class="user-card-avatar">
                                 <% if (followReq.follower.avatar_url) { %>

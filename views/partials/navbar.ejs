@@ -4,7 +4,7 @@
     <% if (typeof user !== 'undefined' && user) { %>
       <a href="/notification" class="notif-link">
         <% if (nCount && nCount > 0) { %>
-          <i class="fa-solid fa-bell" style="color: rgb(253, 5, 5);"></i>
+          <i class="fa-solid fa-bell icon-alert"></i>
           <span class="notif-badge"><%= nCount %></span>
         <% } else { %>
           <i class="fa-solid fa-bell"></i>
@@ -13,7 +13,7 @@
 
       <a href="/requests" class="notif-link">
         <% if (reqCount && reqCount > 0) { %>
-          <i class="fa-solid fa-user-plus" style="color: rgb(253, 5, 5);"></i>
+          <i class="fa-solid fa-user-plus icon-alert"></i>
           <span class="notif-badge"><%= reqCount %></span>
         <% } else { %>
           <i class="fa-solid fa-user-plus"></i>
