@@ -13,6 +13,7 @@ import { AvatarModule } from "src/avatar/avatar.module";
 import { FollowModule } from "src/follow/follow.module";
 import { NotificationModule } from "src/notification/notification.module";
 import { WebCountsInterceptor } from "./interceptors/web-counts.interceptor";
+import { MessagesModule } from "src/messages/messages.module";
 
 
 
@@ -26,7 +27,8 @@ import { WebCountsInterceptor } from "./interceptors/web-counts.interceptor";
         AvatarModule,
         FollowModule,
         NotificationModule,
-        JwtModule
+        JwtModule,
+        MessagesModule
     ],
 
     controllers:[WebController,WebAuthController],

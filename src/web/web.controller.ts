@@ -29,6 +29,7 @@ import { user_role } from "src/users/entities/user.entity";
 import { LazyModuleLoader } from "@nestjs/core";
 import { LikesModule } from "src/likes/likes.module";
 import { LikesService } from "src/likes/likes.service";
+import { MessagesService } from "src/messages/messages.service";
 
 
 
@@ -45,13 +46,14 @@ export class WebController {
         private readonly avatarService: AvatarService,
         private readonly followService: FollowService,
         private readonly notificationService: NotificationService,
+        private readonly messagesService: MessagesService
     ) { }
 
     //lazy loaded like service 
 
-    private async getLikeService(){
-        const moduleRef = await this.lazyModuleLoader.load(()=>LikesModule);
-        return moduleRef.get(LikesService,{strict:false});
+    private async getLikeService() {
+        const moduleRef = await this.lazyModuleLoader.load(() => LikesModule);
+        return moduleRef.get(LikesService, { strict: false });
     }
     // & File upload helper functions
 
@@ -90,7 +92,7 @@ export class WebController {
     home(@Req() req: Request, @Res() res: Response) {
         const user = (req as any).user ?? null;
         const isLogin = req.cookies['refresh_token']
-        res.render('pages/home', this.contextService.build('/', user, { title: 'Home' ,isLogin}));
+        res.render('pages/home', this.contextService.build('/', user, { title: 'Home', isLogin }));
     }
 
 
@@ -121,12 +123,12 @@ export class WebController {
 
         }
         return res.render('pages/feed', this.contextService.build('/feed', user, {
-                posts: result.data,
-                meta: result.meta,
-                link: result.links,
-                reqCount: res.locals.reqCount,
-                nCount: res.locals.nCount
-            }))
+            posts: result.data,
+            meta: result.meta,
+            link: result.links,
+            reqCount: res.locals.reqCount,
+            nCount: res.locals.nCount
+        }))
 
 
     }
@@ -145,16 +147,16 @@ export class WebController {
         const user = (req as any).user;
 
         const post = await this.postsService.findOne(id);
-        
+
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) return res.redirect('/profile')
 
-        
+
         const ownerProfileId = post.profile?.id
-        if(!ownerProfileId && user.role!==user_role.ADMIN) throw new ForbiddenException('This post is no longer availabe as the user has been deactivated')
+        if (!ownerProfileId && user.role !== user_role.ADMIN) throw new ForbiddenException('This post is no longer availabe as the user has been deactivated')
 
         const canAccess = await this.followService.canAccess(profile.id, ownerProfileId);
-        if (!canAccess && user.role!==user_role.ADMIN) throw new ForbiddenException('You must follow the user to view his post ')
+        if (!canAccess && user.role !== user_role.ADMIN) throw new ForbiddenException('You must follow the user to view his post ')
 
         const postForView = {
             ...post,
@@ -240,8 +242,8 @@ export class WebController {
     // * ----Profile
 
     @Get('/profile')
-    @UseGuards(webAuthGuard,RoleGuard)
-    @Roles( user_role.USER)
+    @UseGuards(webAuthGuard, RoleGuard)
+    @Roles(user_role.USER)
     @UseInterceptors(WebCountsInterceptor)
     async ownProfile(
         @Req() req: Request,
@@ -272,7 +274,7 @@ export class WebController {
             hasProfile = true;
         }
 
-        const profileID = curUserProfile?.id ;
+        const profileID = curUserProfile?.id;
 
         const posts = await this.postsService.findPostByUser(profileID, query);
         const follower = await this.followService.findAll(query, profileID);
@@ -431,7 +433,7 @@ export class WebController {
         if (!profile) throw new NotFoundException('profile not found');
 
         const canAccess = await this.followService.canAccess(profile.id, postOwnerId);
-        if(!canAccess && user.role!==user_role.ADMIN) throw new ForbiddenException('Follow this user to commnet this post');
+        if (!canAccess && user.role !== user_role.ADMIN) throw new ForbiddenException('Follow this user to commnet this post');
         try {
             await likesService.create(profile.id, id)
             const message = ` has liked your post`
@@ -481,7 +483,7 @@ export class WebController {
         if (!profile) throw new NotFoundException('Profile not found');
 
         const canAccess = await this.followService.canAccess(profile.id, postOwnerId);
-        if(!canAccess && user.role!==user_role.ADMIN) throw new ForbiddenException('Follow this user to commnet this post');
+        if (!canAccess && user.role !== user_role.ADMIN) throw new ForbiddenException('Follow this user to commnet this post');
         try {
             await this.commentsService.create(profile.id, id, { content: body.content });
             const message = `has commented ${body.content}to your post`
@@ -494,8 +496,8 @@ export class WebController {
     // * ---- Search
 
     @Get('/search')
-    @UseGuards(webAuthGuard,RoleGuard)
-    @Roles( user_role.USER)
+    @UseGuards(webAuthGuard, RoleGuard)
+    @Roles(user_role.USER)
     @UseInterceptors(WebCountsInterceptor)
     async searchUSers(@Req() req: Request, @Res() res: Response, @Query('userName') userName: string, @Paginate() query: PaginateQuery) {
         const user = (req as any).user;
@@ -542,6 +544,8 @@ export class WebController {
         res.redirect(`/profile/${id}`);
 
     }
+
+
     @Post('/profile/:id/unfollow')
     @UseGuards(webAuthGuard)
     async unfollow(
@@ -702,7 +706,7 @@ export class WebController {
         else if (req.body.profileId && req.body.notificationType === notification_type.FOLLOW_REQ) {
             return res.redirect(`/requests`)
         }
-        else if(req.body.postId) {
+        else if (req.body.postId) {
             return res.redirect(`/posts/${req.body.postId}`)
         }
         return res.redirect(`/notification`)
@@ -767,8 +771,8 @@ export class WebController {
 
     // chat page
     @Get('/chat')
-    @UseGuards(webAuthGuard,RoleGuard)
-    @Roles( user_role.USER)
+    @UseGuards(webAuthGuard, RoleGuard)
+    @Roles(user_role.USER)
     @UseInterceptors(WebCountsInterceptor)
     async chatPage(
         @Req() req: Request,
@@ -779,7 +783,7 @@ export class WebController {
         const profile = await this.profileService.findByUserId(user.sub);
         if (!profile) return res.redirect('/profile');
         const following = await this.followService.findAllFollowing(query, profile.id);
-        
+
         res.render('pages/chat', this.contextService.build('/chat', user, {
             title: 'Chat',
             chatProfiles: following.data,
@@ -790,26 +794,49 @@ export class WebController {
     }
 
     @Get('/chat/:id')
-    @UseGuards(webAuthGuard,RoleGuard)
-    @Roles( user_role.USER)
+    @UseGuards(webAuthGuard, RoleGuard)
+    @Roles(user_role.USER)
     async chat(
         @Req() req: Request,
         @Res() res: Response,
-        @Param('id', ParseIntPipe) id: number //profile id of whom to chat with 
-
-    ){
+        @Param('id', ParseIntPipe) id: number, //profile id of whom to chat with 
+        @Paginate() query: PaginateQuery
+    ) {
         const user = (req as any).user ?? null;
         const profile = await this.profileService.findByUserId(user.sub); // current user profile 
         if (!profile) return res.redirect('/profile');
-       
-        const chatprofile = await this.profileService.findByProfileId(id) // profile of whom to chat with 
-          
+
+        const chatprofile = await this.profileService.findByProfileId(id)
+        if (!chatprofile) return res.redirect('/profile') // profile of whom to chat with 
+        const messages = await this.messagesService.getConversationMessages(profile.id, chatprofile?.id, query);
         res.render('pages/chat-box', this.contextService.build('/chat', user, {
             title: 'Chat-box',
             reqCount: res.locals.reqCount,
             nCount: res.locals.nCount,
             profile,
-            chatprofile
+            chatprofile,
+            data: messages.data,
+            meta: messages.meta
         }))
+    }
+
+
+    @Post('/chat/:id')
+    @UseGuards(webAuthGuard, RoleGuard)
+    @Roles(user_role.USER)
+    async createChat(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Param('id', ParseIntPipe) id: number, //profile id of whom to chat with 
+        @Body('message') content: string
+    ) {
+        const user = (req as any).user ?? null;
+        const profile = await this.profileService.findByUserId(user.sub); // current user profile 
+        if (!profile) return res.redirect('/profile');
+
+        const chatprofile = await this.profileService.findByProfileId(id)
+        if (!chatprofile) return res.redirect('/profile') // profile of whom to chat with 
+        await this.messagesService.createMessage(profile.id, chatprofile.id, content);
+        res.redirect(`/chat/${id}`)
     }
 }

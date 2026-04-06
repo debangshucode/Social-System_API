@@ -136,16 +136,16 @@ export class FollowService {
         });
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
-    async rejectRequest(): Promise<void> {
-        await this.followRepo
-            .createQueryBuilder()
-            .update()
-            .set({ status: follow_status.REJECT })
-            .set({ deleted_at: new Date() })
-            .where('status = :status AND created_at < :cutoff', { status: follow_status.PENDING, cutoff: new Date(Date.now() - 24 * 60 * 60 * 1000) })
-            .execute();
-    }
+    // @Cron(CronExpression.EVERY_10_SECONDS)
+    // async rejectRequest(): Promise<void> {
+    //     await this.followRepo
+    //         .createQueryBuilder()
+    //         .update()
+    //         .set({ status: follow_status.REJECT })
+    //         .set({ deleted_at: new Date() })
+    //         .where('status = :status AND created_at < :cutoff', { status: follow_status.PENDING, cutoff: new Date(Date.now() - 24 * 60 * 60 * 1000) })
+    //         .execute();
+    // }
 
     async countPending(profileId: number): Promise<number> {
         return this.followRepo.count({

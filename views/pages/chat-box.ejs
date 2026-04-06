@@ -45,7 +45,7 @@
             />
           <% } else { %>
             <div
-              style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#1f2937;color:#fff;font-weight:700;"
+              style="width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#534ab7;color:#fff;font-weight:700;font-size:1.1rem;"
             >
               <%= (profile?.user_name ?? 'U').charAt(0).toUpperCase() %>
             </div>
@@ -74,13 +74,13 @@
               />
             <% } else { %>
               <div
-                style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#1f2937;color:#fff;font-weight:700;"
+                style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#534ab7;color:#fff;font-weight:700;font-size:1.1rem;"
               >
                 <%= (profile?.user_name ?? 'U').charAt(0).toUpperCase() %>
               </div>
             <% } %>
             <div style="min-width:0;">
-              <p style="font-weight:600;"> <%= profile?.user_name ?? 'You' %> </p>
+              <p style="font-weight:600;"><%= profile?.user_name ?? 'You' %></p>
               <p style="font-size:.82rem;color:#666;">Current profile</p>
             </div>
           </div>
@@ -116,19 +116,74 @@
           <h2 style="margin-top:.3rem;font-size:1rem;color:#201d18;">Message <%= chatprofile?.user_name ?? 'user' %></h2>
         </div>
 
-        <div style="flex:1;padding:1.25rem;display:flex;flex-direction:column;gap:1rem;overflow:auto;">
-          <div style="align-self:flex-start;max-width:72%;padding:.9rem 1rem;border-radius:18px 18px 18px 6px;background:#fff;border:1px solid #eceae3;">
-            <p style="font-weight:600;font-size:.88rem;margin-bottom:.2rem;"><%= chatprofile?.user_name ?? 'User' %></p>
-            <p style="color:#555;">Hey, this is the start of your conversation.</p>
-          </div>
-
-          <div style="align-self:flex-end;max-width:72%;padding:.9rem 1rem;border-radius:18px 18px 6px 18px;background:#534ab7;color:#fff;">
-            <p style="font-weight:600;font-size:.88rem;margin-bottom:.2rem;"><%= profile?.user_name ?? 'You' %></p>
-            <p>This is just mock front-end, backend integration is pending...</p>
-          </div>
+        <div id="chat-thread" style="flex:1;padding:1.25rem;display:flex;flex-direction:column;gap:1rem;overflow:auto;">
+          <% if (data && data.length > 0) { %>
+            <% data.slice().reverse().forEach(function(message) { %>
+              <% const mine = message.sender_id === profile.id; %>
+              <div
+                style="
+                  align-self:<%= mine ? 'flex-end' : 'flex-start' %>;
+                  max-width:72%;
+                  padding:.9rem 1rem;
+                  border-radius:<%= mine ? '18px 18px 6px 18px' : '18px 18px 18px 6px' %>;
+                  background:<%= mine ? '#534ab7' : '#fff' %>;
+                  color:<%= mine ? '#fff' : '#1a1a18' %>;
+                  border:<%= mine ? 'none' : '1px solid #eceae3' %>;
+                  box-shadow:<%= mine ? '0 10px 24px rgba(83,74,183,0.18)' : 'none' %>;
+                "
+              >
+                <p style="font-weight:600;font-size:.88rem;margin-bottom:.2rem;">
+                  <%= mine ? (profile?.user_name ?? 'You') : (chatprofile?.user_name ?? 'User') %>
+                </p>
+                <p style="white-space:pre-wrap;word-break:break-word;"><%= message.content %></p>
+                <p
+                  style="
+                    margin-top:.45rem;
+                    font-size:.74rem;
+                    color:<%= mine ? 'rgba(255,255,255,0.78)' : '#7a766d' %>;
+                    text-align:right;
+                  "
+                >
+                  <%= new Date(message.created_at).toLocaleString() %>
+                </p>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div
+              style="margin:auto;max-width:420px;text-align:center;padding:1.5rem;border:1px dashed #d8d4cb;border-radius:18px;background:rgba(255,255,255,0.7);"
+            >
+              <p style="font-weight:600;font-size:1rem;color:#2a2722;">No messages yet</p>
+              <p style="margin-top:.35rem;color:#6f6b63;">
+                Start the conversation with <%= chatprofile?.user_name ?? 'this user' %>.
+              </p>
+            </div>
+          <% } %>
         </div>
 
-        <form style="padding:1rem 1.25rem;border-top:1px solid #eceae3;background:#fff;display:flex;gap:.85rem;align-items:flex-end;">
+        <% if (meta && meta.totalPages > 1) { %>
+          <div style="padding:0 1.25rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+            <% if (meta.currentPage < meta.totalPages) { %>
+              <a href="/chat/<%= chatprofile.id %>?page=<%= meta.currentPage + 1 %>" class="btn btn-sm btn-outline">Older</a>
+            <% } else { %>
+              <span></span>
+            <% } %>
+
+            <span style="font-size:.82rem;color:#666;">
+              Page <%= meta.currentPage %> of <%= meta.totalPages %>
+            </span>
+
+            <% if (meta.currentPage > 1) { %>
+              <a href="/chat/<%= chatprofile.id %>?page=<%= meta.currentPage - 1 %>" class="btn btn-sm btn-outline">Newer</a>
+            <% } %>
+          </div>
+        <% } %>
+
+        <form
+          method="POST"
+          action="/chat/<%= chatprofile.id %>"
+          style="padding:1rem 1.25rem;border-top:1px solid #eceae3;background:#fff;display:flex;gap:.85rem;align-items:flex-end;"
+        >
+          <%- include('../partials/csrf-field') %>
           <div style="flex:1;">
             <label for="message" style="display:block;font-size:.8rem;font-weight:600;color:#666;margin-bottom:.45rem;">
               Message
@@ -139,6 +194,7 @@
               rows="3"
               placeholder="Write a message to <%= chatprofile?.user_name ?? 'this user' %>..."
               style="width:100%;resize:none;padding:.85rem 1rem;border:1px solid #d9d6cf;border-radius:16px;background:#faf9f5;font:inherit;line-height:1.5;"
+              required
             ></textarea>
           </div>
           <button type="submit" class="btn btn-primary" style="height:fit-content;padding:.8rem 1.25rem;">
@@ -149,3 +205,12 @@
     </div>
   </div>
 </div>
+
+<script>
+  (function () {
+    const thread = document.getElementById('chat-thread');
+    if (thread) {
+      thread.scrollTop = thread.scrollHeight;
+    }
+  })();
+</script>
