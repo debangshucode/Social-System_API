@@ -29,7 +29,13 @@ export class Message {
     @Column({
         default: false
     })
-    read: boolean;
+    is_read: boolean;
+
+    @Column()
+    receiver_id: number;
+
+    @Column()
+    sender_id: number;
 
 
     @CreateDateColumn()
