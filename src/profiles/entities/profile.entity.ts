@@ -5,6 +5,7 @@ import { Comment } from "../../comments/entities/comment.entity";
 import { Like } from "../../likes/entities/like.entity";
 import { Follow } from "src/follow/entities/follow.entity";
 import { Notification } from "src/notification/entities/notification.entity";
+import { Message } from "src/messages/entities/message.entity";
 @Entity('profiles')
 export class Profile {
 
@@ -63,5 +64,11 @@ export class Profile {
 
     @OneToMany(()=> Notification,(notification)=>notification.sender)
     sentNotification: Notification[];
+
+    @OneToMany(()=> Message,(message)=>message.receiver)
+    receivedMessages:Message[];
+
+    @OneToMany(()=>Message,(message)=>message.sender)
+    sentMessages:Message[];
 
 }

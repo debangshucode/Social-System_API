@@ -20,6 +20,7 @@ import { FollowModule } from './follow/follow.module';
 import { NotificationModule } from './notification/notification.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -70,7 +71,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       }),
     }),
 
-    WebModule, UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule, AvatarModule, FollowModule, NotificationModule],
+    WebModule, UsersModule, ProfilesModule, PostsModule, CommentsModule, LikesModule, AuthModule, AvatarModule, FollowModule, NotificationModule, MessagesModule],
   controllers: [AppController],
   providers: [AppService, {
     provide: APP_PIPE,
