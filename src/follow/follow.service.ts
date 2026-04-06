@@ -143,7 +143,7 @@ export class FollowService {
     //         .update()
     //         .set({ status: follow_status.REJECT })
     //         .set({ deleted_at: new Date() })
-    //         .where('status = :status AND created_at < :cutoff', { status: follow_status.PENDING, cutoff: new Date(Date.now() - 24 * 60 * 60 * 1000) })
+    //         .where('status = :status', { status: follow_status.PENDING })
     //         .execute();
     // }
 

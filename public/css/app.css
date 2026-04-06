@@ -1416,7 +1416,7 @@ body {
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #eceae3;
-  background: linear-gradient(135deg, #f8f7f2 0%, #f1efe6 100%);
+  background: linear-gradient(135deg, #f8f7f2 0%, #88e0f5 100%);
 }
 
 .chat-room-ident {
@@ -1544,7 +1544,7 @@ body {
 .chat-room-sidebar {
   border-right: 1px solid #eceae3;
   padding: 1.25rem;
-  background: #faf9f5;
+  background: linear-gradient(214deg, #f8f7f2 0% 0%, #d9f8ff 100%);
 }
 
 .chat-room-participants {
@@ -1677,6 +1677,7 @@ body {
   display: flex;
   gap: 0.85rem;
   align-items: flex-end;
+  background: linear-gradient(188deg, #f8f7f2 0%, #caebf3 100%);
 }
 
 .chat-compose-main {
